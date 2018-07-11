@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		B2A168E920F669A20021139E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A168E820F669A20021139E /* main.cpp */; };
+		B2A168F420F669C50021139E /* filtermap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A168EF20F669C40021139E /* filtermap.cpp */; };
+		B2A168F520F669C50021139E /* CSVIterator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A168F220F669C50021139E /* CSVIterator.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +27,11 @@
 /* Begin PBXFileReference section */
 		B2A168E520F669A20021139E /* TCLDetection */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TCLDetection; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2A168E820F669A20021139E /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		B2A168EF20F669C40021139E /* filtermap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = filtermap.cpp; sourceTree = "<group>"; };
+		B2A168F020F669C40021139E /* filtermap.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = filtermap.hpp; sourceTree = "<group>"; };
+		B2A168F120F669C40021139E /* filters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = filters.h; sourceTree = "<group>"; };
+		B2A168F220F669C50021139E /* CSVIterator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CSVIterator.cpp; sourceTree = "<group>"; };
+		B2A168F320F669C50021139E /* CSVIterator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CSVIterator.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -41,6 +48,11 @@
 		B2A168DC20F669A10021139E = {
 			isa = PBXGroup;
 			children = (
+				B2A168F220F669C50021139E /* CSVIterator.cpp */,
+				B2A168F320F669C50021139E /* CSVIterator.hpp */,
+				B2A168EF20F669C40021139E /* filtermap.cpp */,
+				B2A168F020F669C40021139E /* filtermap.hpp */,
+				B2A168F120F669C40021139E /* filters.h */,
 				B2A168E720F669A20021139E /* TCLDetection */,
 				B2A168E620F669A20021139E /* Products */,
 			);
@@ -118,7 +130,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B2A168F420F669C50021139E /* filtermap.cpp in Sources */,
 				B2A168E920F669A20021139E /* main.cpp in Sources */,
+				B2A168F520F669C50021139E /* CSVIterator.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -237,8 +251,59 @@
 		B2A168ED20F669A20021139E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 39TFK3MY8L;
+				"HEADER_SEARCH_PATHS[arch=*]" = /usr/local/Cellar/opencv/3.4.1_6/include;
+				"LIBRARY_SEARCH_PATHS[arch=*]" = /usr/local/Cellar/opencv/3.4.1_6/lib;
+				"OTHER_LDFLAGS[arch=*]" = (
+					"-I/usr/local/Cellar/opencv/3.4.1_6/include/opencv",
+					"-I/usr/local/Cellar/opencv/3.4.1_6/include",
+					"-L/usr/local/Cellar/opencv/3.4.1_6/lib",
+					"-lopencv_stitching",
+					"-lopencv_superres",
+					"-lopencv_videostab",
+					"-lopencv_aruco",
+					"-lopencv_bgsegm",
+					"-lopencv_bioinspired",
+					"-lopencv_ccalib",
+					"-lopencv_dnn_objdetect",
+					"-lopencv_dpm",
+					"-lopencv_face",
+					"-lopencv_photo",
+					"-lopencv_fuzzy",
+					"-lopencv_hfs",
+					"-lopencv_img_hash",
+					"-lopencv_line_descriptor",
+					"-lopencv_optflow",
+					"-lopencv_reg",
+					"-lopencv_rgbd",
+					"-lopencv_saliency",
+					"-lopencv_stereo",
+					"-lopencv_structured_light",
+					"-lopencv_phase_unwrapping",
+					"-lopencv_surface_matching",
+					"-lopencv_tracking",
+					"-lopencv_datasets",
+					"-lopencv_dnn",
+					"-lopencv_plot",
+					"-lopencv_xfeatures2d",
+					"-lopencv_shape",
+					"-lopencv_video",
+					"-lopencv_ml",
+					"-lopencv_ximgproc",
+					"-lopencv_calib3d",
+					"-lopencv_features2d",
+					"-lopencv_highgui",
+					"-lopencv_videoio",
+					"-lopencv_flann",
+					"-lopencv_xobjdetect",
+					"-lopencv_imgcodecs",
+					"-lopencv_objdetect",
+					"-lopencv_xphoto",
+					"-lopencv_imgproc",
+					"-lopencv_core",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -246,6 +311,7 @@
 		B2A168EE20F669A20021139E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 39TFK3MY8L;
 				PRODUCT_NAME = "$(TARGET_NAME)";
