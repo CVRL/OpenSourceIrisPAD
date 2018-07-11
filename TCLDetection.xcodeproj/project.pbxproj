@@ -10,6 +10,7 @@
 		B2A168E920F669A20021139E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A168E820F669A20021139E /* main.cpp */; };
 		B2A168F420F669C50021139E /* filtermap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A168EF20F669C40021139E /* filtermap.cpp */; };
 		B2A168F520F669C50021139E /* CSVIterator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A168F220F669C50021139E /* CSVIterator.cpp */; };
+		B2D4BECD20F66E0C00BF4257 /* BSIFFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2D4BECB20F66E0C00BF4257 /* BSIFFilter.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -32,6 +33,8 @@
 		B2A168F120F669C40021139E /* filters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = filters.h; sourceTree = "<group>"; };
 		B2A168F220F669C50021139E /* CSVIterator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CSVIterator.cpp; sourceTree = "<group>"; };
 		B2A168F320F669C50021139E /* CSVIterator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CSVIterator.hpp; sourceTree = "<group>"; };
+		B2D4BECB20F66E0C00BF4257 /* BSIFFilter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BSIFFilter.cpp; sourceTree = "<group>"; };
+		B2D4BECC20F66E0C00BF4257 /* BSIFFilter.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BSIFFilter.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +67,8 @@
 		B2A168E720F669A20021139E /* TCLDetection */ = {
 			isa = PBXGroup;
 			children = (
+				B2D4BECB20F66E0C00BF4257 /* BSIFFilter.cpp */,
+				B2D4BECC20F66E0C00BF4257 /* BSIFFilter.hpp */,
 				B2A168F220F669C50021139E /* CSVIterator.cpp */,
 				B2A168F320F669C50021139E /* CSVIterator.hpp */,
 				B2A168EF20F669C40021139E /* filtermap.cpp */,
@@ -131,6 +136,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B2A168F420F669C50021139E /* filtermap.cpp in Sources */,
+				B2D4BECD20F66E0C00BF4257 /* BSIFFilter.cpp in Sources */,
 				B2A168E920F669A20021139E /* main.cpp in Sources */,
 				B2A168F520F669C50021139E /* CSVIterator.cpp in Sources */,
 			);

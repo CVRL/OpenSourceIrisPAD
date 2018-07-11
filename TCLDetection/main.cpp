@@ -116,7 +116,7 @@ void bsif_hist(cv::Mat src, int* histogram, int* dims, cv::Mat& dst){
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 5) {
+    if (argc != 6) {
         cout << "Usage: bsifcpp <mode> <file> <filter height> <filter width> <filter depth>" << endl;
         cout << "Example: bsifcpp img myimage.png 3 3 8" << endl;
     }
