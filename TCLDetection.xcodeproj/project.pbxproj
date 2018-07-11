@@ -48,11 +48,6 @@
 		B2A168DC20F669A10021139E = {
 			isa = PBXGroup;
 			children = (
-				B2A168F220F669C50021139E /* CSVIterator.cpp */,
-				B2A168F320F669C50021139E /* CSVIterator.hpp */,
-				B2A168EF20F669C40021139E /* filtermap.cpp */,
-				B2A168F020F669C40021139E /* filtermap.hpp */,
-				B2A168F120F669C40021139E /* filters.h */,
 				B2A168E720F669A20021139E /* TCLDetection */,
 				B2A168E620F669A20021139E /* Products */,
 			);
@@ -69,6 +64,11 @@
 		B2A168E720F669A20021139E /* TCLDetection */ = {
 			isa = PBXGroup;
 			children = (
+				B2A168F220F669C50021139E /* CSVIterator.cpp */,
+				B2A168F320F669C50021139E /* CSVIterator.hpp */,
+				B2A168EF20F669C40021139E /* filtermap.cpp */,
+				B2A168F020F669C40021139E /* filtermap.hpp */,
+				B2A168F120F669C40021139E /* filters.h */,
 				B2A168E820F669A20021139E /* main.cpp */,
 			);
 			path = TCLDetection;
