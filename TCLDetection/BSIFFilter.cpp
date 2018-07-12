@@ -6,7 +6,17 @@
 
 
 #include "BSIFFilter.hpp"
-BSIFFilter::BSIFFilter(int dimension, int bitlength) {size = dimension; bits = bitlength; }
+BSIFFilter::BSIFFilter(int dimension, int bitlength) {
+    size = dimension; bits = bitlength;
+    // load the hard-coded filters
+    t_filtermap filters = build_filter_map();
+    // here we retrieve a filter from the map
+    char filtername[50];
+    sprintf(filtername, "filter_%d_%d_%d", size, size, bits);
+    
+    double* myFilter;
+    myFilter = filters[filtername];
+}
 
 void BSIFFilter::generateImage(cv::Mat src, cv::Mat& dst) {
     //initializing matrix of 1s
@@ -21,15 +31,6 @@ void BSIFFilter::generateImage(cv::Mat src, cv::Mat& dst) {
     int border = floor(size/2);
     cv::Mat imgWrap = src;
     cv::copyMakeBorder(src, imgWrap, border, border, border, border, cv::BORDER_WRAP);
-    
-    // load the hard-coded filters
-    t_filtermap filters = build_filter_map();
-    // here we retrieve a filter from the map
-    char filtername[50];
-    sprintf(filtername, "filter_%d_%d_%d", size, size, bits);
-    
-    double* myFilter;
-    myFilter = filters[filtername];
     
     // Loop over scales
     cv::Mat ci; // the textured image after filter

@@ -25,7 +25,7 @@ public:
 private:
     int size;
     int bits;
-    
+    double* myFilter;
 };
 
 int s2i(int size, int bits, int i, int j, int k);
