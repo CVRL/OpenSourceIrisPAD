@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
     }
     
     // Set mode
-    char mode = atoi(argv[1]);
+    int mode = atoi(argv[1]);
     
     // Set filename
     char *filename = argv[2];
