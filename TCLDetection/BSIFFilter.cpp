@@ -8,7 +8,7 @@
 #include "BSIFFilter.hpp"
 BSIFFilter::BSIFFilter(int dimension, int bitlength) {size = dimension; bits = bitlength; }
 
-cv::Mat BSIFFilter::generateImage(cv::Mat src) {
+void BSIFFilter::generateImage(cv::Mat src) {
     //initializing matrix of 1s
     double codeImg[src.rows][src.cols];
     for (int i = 0; i < src.rows; i++){
@@ -65,7 +65,9 @@ cv::Mat BSIFFilter::generateImage(cv::Mat src) {
         itr++;
     }
     cv::Mat tmp = cv::Mat(src.rows, src.cols, CV_64FC1, &codeImg);
-    return tmp;
+    cv::Mat im2 = cv::Mat(src.rows, src.cols, CV_8UC1);
+    cv::normalize(tmp, im2, 0, 255, cv::NORM_MINMAX);
+    cv::imwrite("new_output.png", im2);
 }
 
 std::vector<int> BSIFFilter::generateHistogram(cv::Mat src) {

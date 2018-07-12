@@ -8,10 +8,11 @@
 #ifndef BSIFFilter_hpp
 #define BSIFFilter_hpp
 
-#include <stdio.h>
 #include <vector>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
 #include "filtermap.hpp"
 
 class BSIFFilter {
@@ -20,7 +21,7 @@ public:
     BSIFFilter();
     
     std::vector<int> generateHistogram(cv::Mat src);
-    cv::Mat generateImage(cv::Mat src);
+    void generateImage(cv::Mat src);
 private:
     int size;
     int bits;

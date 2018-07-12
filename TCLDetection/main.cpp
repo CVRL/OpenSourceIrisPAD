@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
     // Declare BSIF filter
     BSIFFilter threeXthree(3,8);
     
-    cv::Mat imout = threeXthree.generateImage(image);
+    threeXthree.generateImage(image);
     std::vector<int> histogram = threeXthree.generateHistogram(image);
     
     ofstream histfile;
@@ -47,9 +47,9 @@ int main(int argc, char *argv[]) {
     for (int i = 1; i < (histogram.size() - 1); i++) histfile << histogram[i] << ", ";
     histfile << histogram[histogram.size()-1] << endl;
         
-    cv::Mat im2 = cv::Mat(image.rows, image.cols, CV_8UC1);
-    cv::normalize(imout, im2, 0, 255, cv::NORM_MINMAX);
-    imwrite("new_output.png", im2);
+    //cv::Mat im2 = cv::Mat(image.rows, image.cols, CV_8UC1);
+    //cv::normalize(imout, im2, 0, 255, cv::NORM_MINMAX);
+    //imwrite("new_output.png", im2);
     
         //} else if (strncmp(argv[1], "csv", 4) == 0) {
         // csv file mode
