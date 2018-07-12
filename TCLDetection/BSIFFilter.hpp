@@ -20,8 +20,8 @@ public:
     BSIFFilter(int dimension, int bitlength);
     BSIFFilter();
     
-    std::vector<int> generateHistogram(cv::Mat src);
-    void generateImage(cv::Mat src);
+    void generateHistogram(cv::Mat src, std::vector<int>& histogram);
+    void generateImage(cv::Mat src, cv::Mat& dst);
 private:
     int size;
     int bits;

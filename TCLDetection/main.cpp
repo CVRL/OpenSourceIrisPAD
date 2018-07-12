@@ -39,8 +39,16 @@ int main(int argc, char *argv[]) {
     // Declare BSIF filter
     BSIFFilter threeXthree(3,8);
     
-    threeXthree.generateImage(image);
-    std::vector<int> histogram = threeXthree.generateHistogram(image);
+    // Initialize histogram
+    int histsize = pow(2,8) + 1;
+    std::vector<int> histogram(histsize, 0);
+    
+    // Initialize output image
+    cv::Mat imout;
+    
+    threeXthree.generateImage(image,imout);
+    imwrite("new_output.png", imout);
+    threeXthree.generateHistogram(image, histogram);
     
     ofstream histfile;
     histfile.open("histogram_single.csv", ios::out | ios::trunc);

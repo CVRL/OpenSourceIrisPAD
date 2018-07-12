@@ -8,7 +8,7 @@
 #include "BSIFFilter.hpp"
 BSIFFilter::BSIFFilter(int dimension, int bitlength) {size = dimension; bits = bitlength; }
 
-void BSIFFilter::generateImage(cv::Mat src) {
+void BSIFFilter::generateImage(cv::Mat src, cv::Mat& dst) {
     //initializing matrix of 1s
     double codeImg[src.rows][src.cols];
     for (int i = 0; i < src.rows; i++){
@@ -64,13 +64,14 @@ void BSIFFilter::generateImage(cv::Mat src) {
         }
         itr++;
     }
+    
     cv::Mat tmp = cv::Mat(src.rows, src.cols, CV_64FC1, &codeImg);
     cv::Mat im2 = cv::Mat(src.rows, src.cols, CV_8UC1);
     cv::normalize(tmp, im2, 0, 255, cv::NORM_MINMAX);
-    cv::imwrite("new_output.png", im2);
+    dst = im2;
 }
 
-std::vector<int> BSIFFilter::generateHistogram(cv::Mat src) {
+void BSIFFilter::generateHistogram(cv::Mat src, std::vector<int>& histogram) {
     //initializing matrix of 1s
     double codeImg[src.rows][src.cols];
     for (int i = 0; i < src.rows; i++){
@@ -126,10 +127,6 @@ std::vector<int> BSIFFilter::generateHistogram(cv::Mat src) {
         }
         itr++;
     }
-    
-    // Initialize histogram vector
-    int histsize = pow(2, bits) + 1;
-    static std::vector<int> histogram(histsize, 0);
     
     // Creating the histogram
     for (int j = 0; j < src.rows; j++){
@@ -137,7 +134,6 @@ std::vector<int> BSIFFilter::generateHistogram(cv::Mat src) {
             histogram[(int)codeImg[j][k]]++;
         }
     }
-    return histogram;
 }
 
 // convert linear indexing to subscript indexing
