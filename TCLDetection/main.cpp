@@ -14,6 +14,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/ml/ml.hpp>
 #include <string>
 #include <regex>
 #include <fstream>
@@ -27,7 +28,10 @@ using namespace std;
 int main(int argc, char *argv[]) {
     if (argc != 5) {
         cout << "Usage: TCLD <mode> <file> <filter dimension> <filter bits>" << endl;
-        cout << "Modes: " << endl << "0 Retrain Model (.csv input)" << endl << "1 Make Decision (image input)" << endl;
+        cout << "Modes: " << endl;
+        cout << "0 Extract features (.csv input)" << endl;
+        cout << "1 Make decision (image input)" << endl;
+        cout << "2 Train SVM" << endl;
         cout << "Example: bsifcpp 0 myimage.png 3 8" << endl;
         return 0;
     }
@@ -119,6 +123,14 @@ int main(int argc, char *argv[]) {
             histfile.open("histogram_single.csv", ios::out | ios::trunc);
             for (int i = 1; i < (histogram.size() - 1); i++) histfile << histogram[i] << ", ";
             histfile << histogram[histogram.size()-1] << endl;
+            break;
+        }
+        case 2: {
+            // Set up SVM parameters
+            cv::Ptr<cv::ml::SVM> svm = cv::ml::SVM::create();
+            svm->setType(cv::ml::SVM::C_SVC);
+            svm->setKernel(cv::ml::SVM::LINEAR);
+            svm->setTermCriteria(cv::TermCriteria(cv::TermCriteria::MAX_ITER, 100, 1e-6));
             break;
         }
         default: {
