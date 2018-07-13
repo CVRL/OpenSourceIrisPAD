@@ -62,19 +62,24 @@ int main(int argc, char *argv[]) {
             size_t numCols = (*imageList).size();
             
             // Find locations of desired columns
-            int i = 2; // number of desired columns
+            int i = 3; // number of desired columns
             size_t sequenceid = 0;
             size_t format = 0;
+            size_t texture = 0;
             
             for (size_t k = 0; k < numCols; k++) {
-              if ((*imageList)[k] == "sequenceid") {
-                sequenceid = k;
-                i--;
-              } else if ((*imageList)[k] == "format") {
-               format = k;
-                i--;
-              }
+                if ((*imageList)[k] == "sequenceid") {
+                    sequenceid = k;
+                    i--;
+                } else if ((*imageList)[k] == "format") {
+                    format = k;
+                    i--;
+                } else if ((*imageList)[k] == "contacts_texture") {
+                    texture = k;
+                    i--;
+                }
             }
+            
             
             if (i == 0) {
              // If both parameters present
@@ -93,7 +98,7 @@ int main(int argc, char *argv[]) {
              cout << "Currently calculating features for: " << (*imageList)[sequenceid] + "." + (*imageList)[format] << endl;
              cv::Mat image = cv::imread(currentImage, 0);
              filter.generateHistogram(image, histogram);
-             histfile << (*imageList)[sequenceid] + "." + (*imageList)[format] + ", ";
+             histfile << (*imageList)[sequenceid] + "." + (*imageList)[format] + ", " << (*imageList)[texture] + ", ";
              for (int i = 1; i < histsize; i++) histfile << histogram[i] << ", ";
              histfile << endl;
              imageList++;
