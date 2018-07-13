@@ -75,36 +75,40 @@ int main(int argc, char *argv[]) {
                     format = k;
                     i--;
                 } else if ((*imageList)[k] == "contacts_texture") {
-                    texture = k;
+                    texture = k + 1; // need to add one because illuminant id will be read as two separate parts
                     i--;
                 }
             }
             
-            
             if (i == 0) {
-             // If both parameters present
-             // Outputting to a CSV file
-             ofstream histfile;
-             histfile.open("histogram.csv", ios::out | ios::trunc);
-             
-             // String to store the current file name
-             string currentImage;
-             
-             imageList++; // Skip the header line of the .csv
-             
-             while (imageList != CSVIterator()) {
-             std::vector<int> histogram(histsize, 0); //reset histogram memory
-             currentImage = "./NDCLD15/TIFF/" + (*imageList)[sequenceid] + "." + (*imageList)[format]; //Make sure to include file path
-             cout << "Currently calculating features for: " << (*imageList)[sequenceid] + "." + (*imageList)[format] << endl;
-             cv::Mat image = cv::imread(currentImage, 0);
-             filter.generateHistogram(image, histogram);
-             histfile << (*imageList)[sequenceid] + "." + (*imageList)[format] + ", " << (*imageList)[texture] + ", ";
-             for (int i = 1; i < histsize; i++) histfile << histogram[i] << ", ";
-             histfile << endl;
-             imageList++;
-             }
-             
-             histfile.close();
+                // If both parameters present
+                // Outputting to a CSV file
+                ofstream histfile;
+                histfile.open("histogram.csv", ios::out | ios::trunc);
+                
+                // String to store the current file name
+                string currentImage;
+                
+                imageList++; // Skip the header line of the .csv
+                
+                while (imageList != CSVIterator()) {
+                    std::vector<int> histogram(histsize, 0); //reset histogram memory
+                    currentImage = "./NDCLD15/TIFF/" + (*imageList)[sequenceid] + "." + (*imageList)[format]; //Make sure to include file path
+                    cout << "Currently calculating features for: " << (*imageList)[sequenceid] + "." + (*imageList)[format] << endl;
+                    cv::Mat image = cv::imread(currentImage, 0);
+                    filter.generateHistogram(image, histogram);
+                    histfile << (*imageList)[sequenceid] + "." + (*imageList)[format] + ", ";
+                    if ((*imageList)[texture] == "No") {
+                        histfile << "-1" << ", ";
+                    } else {
+                        histfile << "1" << ", ";
+                    }
+                    for (int i = 1; i < histsize; i++) histfile << histogram[i] << ", ";
+                    histfile << endl;
+                    imageList++;
+                }
+                
+                histfile.close();
             } else {
                 cout << "Error: incorrect .csv file format.  Need to have sequenceid and format available." << endl;
             }
