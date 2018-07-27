@@ -17,11 +17,15 @@
 
 class BSIFFilter {
 public:
-    BSIFFilter(int dimension, int bitlength);
     BSIFFilter();
+    
+    void loadFilter(int dimension, int bitlength);
     
     void generateHistogram(cv::Mat src, std::vector<int>& histogram);
     void generateImage(cv::Mat src, cv::Mat& dst);
+    
+    std::string filtername;
+    std::string downFiltername;
 private:
     int size;
     int bits;

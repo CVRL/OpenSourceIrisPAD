@@ -9,7 +9,6 @@
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
-#include <iostream>
 #include <fstream>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -18,8 +17,9 @@
 #include <string>
 #include <regex>
 #include <fstream>
-#include "CSVIterator.hpp"
-#include "BSIFFilter.hpp"
+//#include "CSVIterator.hpp"
+//#include "BSIFFilter.hpp"
+#include "TCLManager.cpp"
 
 
 using namespace std;
@@ -49,7 +49,7 @@ string type2str(int type) {
 */
 
 int main(int argc, char *argv[]) {
-    if (argc != 5) {
+    /* if (argc != 5) {
         cout << "Usage: TCLD <mode> <file> <filter dimension> <filter bits>" << endl;
         cout << "Modes: " << endl;
         cout << "0 Extract features (.csv input)" << endl;
@@ -75,68 +75,18 @@ int main(int argc, char *argv[]) {
     // Initialize histogram
     int histsize = pow(2,bitsize) + 1;
     std::vector<int> histogram(histsize, 0);
+    */
     
     
-    switch(mode) {
-        case 0: {
-            // csv file mode: take in .csv with names of image files
-            ifstream listOfImages(filename);
-            CSVIterator imageList(listOfImages);
-            size_t numCols = (*imageList).size();
-            
-            // Find locations of desired columns
-            int i = 3; // number of desired columns
-            size_t sequenceid = 0;
-            size_t format = 0;
-            size_t texture = 0;
-            
-            for (size_t k = 0; k < numCols; k++) {
-                if ((*imageList)[k] == "sequenceid") {
-                    sequenceid = k;
-                    i--;
-                } else if ((*imageList)[k] == "format") {
-                    format = k;
-                    i--;
-                } else if ((*imageList)[k] == "contacts_texture") {
-                    texture = k + 1; // need to add one because illuminant id will be read as two separate parts
-                    i--;
-                }
-            }
-            
-            if (i == 0) {
-                // If both parameters present
-                // Outputting to a CSV file
-                ofstream histfile;
-                histfile.open("histogram.csv", ios::out | ios::trunc);
-                
-                // String to store the current file name
-                string currentImage;
-                
-                imageList++; // Skip the header line of the .csv
-                
-                while (imageList != CSVIterator()) {
-                    std::vector<int> histogram(histsize, 0); //reset histogram memory
-                    currentImage = "./NDCLD15/TIFF/" + (*imageList)[sequenceid] + "." + (*imageList)[format]; //Make sure to include file path
-                    cout << "Currently calculating features for: " << (*imageList)[sequenceid] + "." + (*imageList)[format] << endl;
-                    cv::Mat image = cv::imread(currentImage, 0);
-                    filter.generateHistogram(image, histogram);
-                    histfile << (*imageList)[sequenceid] + "." + (*imageList)[format] + ", ";
-                    if ((*imageList)[texture] == "No") {
-                        histfile << "-1" << ", ";
-                    } else {
-                        histfile << "1" << ", ";
-                    }
-                    for (int i = 1; i < histsize; i++) histfile << histogram[i] << ", ";
-                    histfile << endl;
-                    imageList++;
-                }
-                
-                histfile.close();
-            } else {
-                cout << "Error: incorrect .csv file format.  Need to have sequenceid and format available." << endl;
-            }
-            break;
-        }
+    // Testing TCLManager
+    TCLManager tcl;
+    tcl.loadConfig(argv[2]);
+    tcl.showConfig();
+    
+    tcl.run();
+    
+    
+    /*
         case 1: {
             // For now will just generate features for a single image
             // Read image
@@ -194,7 +144,7 @@ int main(int argc, char *argv[]) {
             cout << "Error: Please enter a valid mode of operation." << endl;
         }
     }
-    
+    */
     
     return 0;
     

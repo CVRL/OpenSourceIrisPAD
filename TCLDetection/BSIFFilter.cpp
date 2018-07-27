@@ -6,14 +6,27 @@
 
 
 #include "BSIFFilter.hpp"
-BSIFFilter::BSIFFilter(int dimension, int bitlength) {
+#include <cstdio>
+#include <iostream>
+BSIFFilter::BSIFFilter(void) {}
+
+void BSIFFilter::loadFilter(int dimension, int bitlength) {
     size = dimension; bits = bitlength;
+    
+    // Set the filter name
+    std::stringstream nameStream;
+    nameStream << "filter_" << size << "_" << size << "_" << bits;
+    filtername = nameStream.str();
+    
+    // Set the downsampled filter name
+    nameStream.str(std::string());
+    nameStream << "filter_" << (size * 2) << "_" << (size * 2) << "_" << bits;
+    downFiltername = nameStream.str();
+    
     // load the hard-coded filters
     t_filtermap filters = build_filter_map();
-    // here we retrieve a filter from the map
-    char filtername[50];
-    sprintf(filtername, "filter_%d_%d_%d", size, size, bits);
     
+    // Retrieve filter from filtermap
     double* myFilter;
     myFilter = filters[filtername];
 }

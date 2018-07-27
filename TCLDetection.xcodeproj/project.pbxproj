@@ -7,9 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B2363900210BBCF30050597B /* featureExtractor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B23638FE210BBCF30050597B /* featureExtractor.cpp */; };
+		B27A52E320FE8F0B005F8D93 /* TCLManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B27A52E220FE8F0B005F8D93 /* TCLManager.cpp */; };
 		B2A168E920F669A20021139E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A168E820F669A20021139E /* main.cpp */; };
 		B2A168F420F669C50021139E /* filtermap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A168EF20F669C40021139E /* filtermap.cpp */; };
 		B2A168F520F669C50021139E /* CSVIterator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A168F220F669C50021139E /* CSVIterator.cpp */; };
+		B2D11E43210B63E2008DF7CF /* sampleDatabase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2D11E41210B63E2008DF7CF /* sampleDatabase.cpp */; };
 		B2D4BECD20F66E0C00BF4257 /* BSIFFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2D4BECB20F66E0C00BF4257 /* BSIFFilter.cpp */; };
 /* End PBXBuildFile section */
 
@@ -26,6 +29,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		B23638FE210BBCF30050597B /* featureExtractor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = featureExtractor.cpp; sourceTree = "<group>"; };
+		B23638FF210BBCF30050597B /* featureExtractor.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = featureExtractor.hpp; sourceTree = "<group>"; };
+		B27A52E220FE8F0B005F8D93 /* TCLManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TCLManager.cpp; sourceTree = "<group>"; };
+		B281CF3A2103D40C00688B67 /* OsiStringUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OsiStringUtils.h; sourceTree = "<group>"; };
 		B2A168E520F669A20021139E /* TCLDetection */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TCLDetection; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2A168E820F669A20021139E /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		B2A168EF20F669C40021139E /* filtermap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = filtermap.cpp; sourceTree = "<group>"; };
@@ -33,6 +40,8 @@
 		B2A168F120F669C40021139E /* filters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = filters.h; sourceTree = "<group>"; };
 		B2A168F220F669C50021139E /* CSVIterator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CSVIterator.cpp; sourceTree = "<group>"; };
 		B2A168F320F669C50021139E /* CSVIterator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CSVIterator.hpp; sourceTree = "<group>"; };
+		B2D11E41210B63E2008DF7CF /* sampleDatabase.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sampleDatabase.cpp; sourceTree = "<group>"; };
+		B2D11E42210B63E2008DF7CF /* sampleDatabase.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = sampleDatabase.hpp; sourceTree = "<group>"; };
 		B2D4BECB20F66E0C00BF4257 /* BSIFFilter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BSIFFilter.cpp; sourceTree = "<group>"; };
 		B2D4BECC20F66E0C00BF4257 /* BSIFFilter.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BSIFFilter.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -69,12 +78,18 @@
 			children = (
 				B2D4BECB20F66E0C00BF4257 /* BSIFFilter.cpp */,
 				B2D4BECC20F66E0C00BF4257 /* BSIFFilter.hpp */,
+				B2D11E41210B63E2008DF7CF /* sampleDatabase.cpp */,
+				B23638FE210BBCF30050597B /* featureExtractor.cpp */,
+				B23638FF210BBCF30050597B /* featureExtractor.hpp */,
+				B2D11E42210B63E2008DF7CF /* sampleDatabase.hpp */,
 				B2A168F220F669C50021139E /* CSVIterator.cpp */,
 				B2A168F320F669C50021139E /* CSVIterator.hpp */,
 				B2A168EF20F669C40021139E /* filtermap.cpp */,
 				B2A168F020F669C40021139E /* filtermap.hpp */,
 				B2A168F120F669C40021139E /* filters.h */,
 				B2A168E820F669A20021139E /* main.cpp */,
+				B27A52E220FE8F0B005F8D93 /* TCLManager.cpp */,
+				B281CF3A2103D40C00688B67 /* OsiStringUtils.h */,
 			);
 			path = TCLDetection;
 			sourceTree = "<group>";
@@ -135,7 +150,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B2D11E43210B63E2008DF7CF /* sampleDatabase.cpp in Sources */,
 				B2A168F420F669C50021139E /* filtermap.cpp in Sources */,
+				B2363900210BBCF30050597B /* featureExtractor.cpp in Sources */,
+				B27A52E320FE8F0B005F8D93 /* TCLManager.cpp in Sources */,
 				B2D4BECD20F66E0C00BF4257 /* BSIFFilter.cpp in Sources */,
 				B2A168E920F669A20021139E /* main.cpp in Sources */,
 				B2A168F520F669C50021139E /* CSVIterator.cpp in Sources */,

@@ -20,11 +20,47 @@ void CSVRow::readNextRow(std::istream& str)
     std::stringstream   lineStream(line);
     std::string         cell;
     
+    bool lookingForEndquote = false;
+    int startQuoteIdx = -1;
+    int endQuoteIdx = -1;
+    
     m_data.clear();
     while(std::getline(lineStream, cell, ','))
     {
+        // Add cell to row vector
         m_data.push_back(cell);
+        
+        // Look for presence of quotes within a cell, would indicate a list of items (assume that there will not be two sets in the same cell)
+        if (!(cell.find("\"") == std::string::npos)) {
+            if (lookingForEndquote) {
+                endQuoteIdx = (int)m_data.size() - 1;
+                
+                // Append strings within set of quotes and erase separate vector cells
+                for (int i = 1; i < ((endQuoteIdx - startQuoteIdx) + 1); i++) {
+                    // Add cell to the immediate right of start, then remove that cell so next cell is always at (start + 1)
+                    m_data.at(startQuoteIdx) = m_data.at(startQuoteIdx).append("," + m_data.at(startQuoteIdx + 1));
+                    m_data.erase(m_data.begin() + startQuoteIdx + 1);
+                }
+                // Remove extra commas
+                size_t commaIdx;
+                while ((commaIdx = m_data[startQuoteIdx].find(",")) != std::string::npos) {
+                    m_data[startQuoteIdx].erase(commaIdx,1);
+                }
+                // Remove quotation marks
+                size_t quoteIdx;
+                while ((quoteIdx = m_data[startQuoteIdx].find("\"")) != std::string::npos) {
+                    m_data[startQuoteIdx].erase(quoteIdx,1);
+                }
+                // Reset control
+                lookingForEndquote = false;
+
+            } else {
+                startQuoteIdx = (int)m_data.size() - 1;
+                lookingForEndquote = true;
+            }
+        }
     }
+    
     // This checks for a trailing comma with no data after it.
     if (!lineStream && cell.empty())
     {
