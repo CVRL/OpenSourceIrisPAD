@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B2174260210D4AE700B7B784 /* testSeparator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B217425E210D4AE700B7B784 /* testSeparator.cpp */; };
 		B2363900210BBCF30050597B /* featureExtractor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B23638FE210BBCF30050597B /* featureExtractor.cpp */; };
 		B27A52E320FE8F0B005F8D93 /* TCLManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B27A52E220FE8F0B005F8D93 /* TCLManager.cpp */; };
 		B2A168E920F669A20021139E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A168E820F669A20021139E /* main.cpp */; };
@@ -29,6 +30,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		B217425E210D4AE700B7B784 /* testSeparator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = testSeparator.cpp; sourceTree = "<group>"; };
+		B217425F210D4AE700B7B784 /* testSeparator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = testSeparator.hpp; sourceTree = "<group>"; };
 		B23638FE210BBCF30050597B /* featureExtractor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = featureExtractor.cpp; sourceTree = "<group>"; };
 		B23638FF210BBCF30050597B /* featureExtractor.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = featureExtractor.hpp; sourceTree = "<group>"; };
 		B27A52E220FE8F0B005F8D93 /* TCLManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TCLManager.cpp; sourceTree = "<group>"; };
@@ -79,6 +82,8 @@
 				B2D4BECB20F66E0C00BF4257 /* BSIFFilter.cpp */,
 				B2D4BECC20F66E0C00BF4257 /* BSIFFilter.hpp */,
 				B2D11E41210B63E2008DF7CF /* sampleDatabase.cpp */,
+				B217425E210D4AE700B7B784 /* testSeparator.cpp */,
+				B217425F210D4AE700B7B784 /* testSeparator.hpp */,
 				B23638FE210BBCF30050597B /* featureExtractor.cpp */,
 				B23638FF210BBCF30050597B /* featureExtractor.hpp */,
 				B2D11E42210B63E2008DF7CF /* sampleDatabase.hpp */,
@@ -153,6 +158,7 @@
 				B2D11E43210B63E2008DF7CF /* sampleDatabase.cpp in Sources */,
 				B2A168F420F669C50021139E /* filtermap.cpp in Sources */,
 				B2363900210BBCF30050597B /* featureExtractor.cpp in Sources */,
+				B2174260210D4AE700B7B784 /* testSeparator.cpp in Sources */,
 				B27A52E320FE8F0B005F8D93 /* TCLManager.cpp in Sources */,
 				B2D4BECD20F66E0C00BF4257 /* BSIFFilter.cpp in Sources */,
 				B2A168E920F669A20021139E /* main.cpp in Sources */,
