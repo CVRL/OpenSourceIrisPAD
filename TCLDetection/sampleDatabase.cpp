@@ -222,6 +222,6 @@ void sampleDatabase::load(void) {
     }
     
 }
-    
+
 vector<subject>& sampleDatabase::operator*() {return listOfSubjects;}
 

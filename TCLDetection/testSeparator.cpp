@@ -30,23 +30,29 @@ public:
                     if ((*(*data)[i])[j].classification == "none") {
                         if (numNone > 0) {
                             trainingSet.push_back((*(*data)[i])[j].filename);
+                            trainingClass.push_back(classNumber((*(*data)[i])[j].classification));
                             numNone--;
                         } else {
                             testingSet.push_back((*(*data)[i])[j].filename);
+                            testingClass.push_back(classNumber((*(*data)[i])[j].classification));
                         }
                     } else if ((*(*data)[i])[j].classification == "clear") {
                         if (numClear > 0) {
                             trainingSet.push_back((*(*data)[i])[j].filename);
+                            trainingClass.push_back(classNumber((*(*data)[i])[j].classification));
                             numClear--;
                         } else {
                             testingSet.push_back((*(*data)[i])[j].filename);
+                            testingClass.push_back(classNumber((*(*data)[i])[j].classification));
                         }
                     } else if ((*(*data)[i])[j].classification == "textured") {
                         if (numText > 0) {
                             trainingSet.push_back((*(*data)[i])[j].filename);
+                            trainingClass.push_back(classNumber((*(*data)[i])[j].classification));
                             numText--;
                         } else {
                             testingSet.push_back((*(*data)[i])[j].filename);
+                            testingClass.push_back(classNumber((*(*data)[i])[j].classification));
                         }
                     }
                 }
@@ -82,10 +88,12 @@ public:
                 if (binary_search(trainingIdx.begin(), trainingIdx.end(), i)) {
                     for (int j = 0; j < (*(*data)[i]).size(); j++) {
                         trainingSet.push_back((*(*data)[i])[j].filename);
+                        trainingClass.push_back(classNumber((*(*data)[i])[j].classification));
                     }
                 } else {
                     for (int j = 0; j < (*(*data)[i]).size(); j++) {
                         testingSet.push_back((*(*data)[i])[j].filename);
+                        testingClass.push_back(classNumber((*(*data)[i])[j].classification));
                     }
                 }
             }
@@ -123,24 +131,30 @@ public:
                     if ((*(*data)[i])[j].classification == "none") {
                         if (numNone > 0) {
                             trainingSet.push_back((*(*data)[i])[j].filename);
+                            trainingClass.push_back(classNumber((*(*data)[i])[j].classification));
                             numNone--;
                         } else {
                             testingSet.push_back((*(*data)[i])[j].filename);
+                            testingClass.push_back(classNumber((*(*data)[i])[j].classification));
                         }
                     } else if ((*(*data)[i])[j].classification == "clear") {
                         if (numClear > 0) {
                             trainingSet.push_back((*(*data)[i])[j].filename);
+                            trainingClass.push_back(classNumber((*(*data)[i])[j].classification));
                             numClear--;
                         } else {
                             testingSet.push_back((*(*data)[i])[j].filename);
+                            testingClass.push_back(classNumber((*(*data)[i])[j].classification));
                         }
                     } else if ((*(*data)[i])[j].classification == "textured") {
                         // Include all samples from specified manufacturers
                         if (find(nameVector.begin(), nameVector.end(), (*(*data)[i])[j].manufacturer) != nameVector.end()) {
                             trainingSet.push_back((*(*data)[i])[j].filename);
+                            trainingClass.push_back(classNumber((*(*data)[i])[j].classification));
                             cout << (*(*data)[i])[j].manufacturer << endl;
                         } else {
                             testingSet.push_back((*(*data)[i])[j].filename);
+                            testingClass.push_back(classNumber((*(*data)[i])[j].classification));
                         }
                     }
                 }
@@ -154,8 +168,10 @@ public:
                     // Include all samples from specified sensors
                     if (find(nameVector.begin(), nameVector.end(), (*(*data)[i])[j].sensor) != nameVector.end()) {
                         trainingSet.push_back((*(*data)[i])[j].filename);
+                        trainingClass.push_back(classNumber((*(*data)[i])[j].classification));
                     } else {
                         testingSet.push_back((*(*data)[i])[j].filename);
+                        testingClass.push_back(classNumber((*(*data)[i])[j].classification));
                     }
                 }
             }
@@ -172,23 +188,29 @@ public:
                     if ((*(*data)[i])[j].classification == "none") {
                         if (numNone > 0) {
                             trainingSet.push_back((*(*data)[i])[j].filename);
+                            trainingClass.push_back(classNumber((*(*data)[i])[j].classification));
                             numNone--;
                         } else {
                             testingSet.push_back((*(*data)[i])[j].filename);
+                            testingClass.push_back(classNumber((*(*data)[i])[j].classification));
                         }
                     } else if ((*(*data)[i])[j].classification == "clear") {
                         if (numClear > 0) {
                             trainingSet.push_back((*(*data)[i])[j].filename);
+                            trainingClass.push_back(classNumber((*(*data)[i])[j].classification));
                             numClear--;
                         } else {
                             testingSet.push_back((*(*data)[i])[j].filename);
+                            testingClass.push_back(classNumber((*(*data)[i])[j].classification));
                         }
                     } else if ((*(*data)[i])[j].classification == "textured") {
                         // Exclude all samples from specified manufacturers
                         if (find(nameVector.begin(), nameVector.end(), (*(*data)[i])[j].manufacturer) == nameVector.end()) {
                             trainingSet.push_back((*(*data)[i])[j].filename);
+                            trainingClass.push_back(classNumber((*(*data)[i])[j].classification));
                         } else {
                             testingSet.push_back((*(*data)[i])[j].filename);
+                            testingClass.push_back(classNumber((*(*data)[i])[j].classification));
                         }
                     }
                 }
@@ -201,8 +223,10 @@ public:
                     // Exclude all samples from specified sensors
                     if (find(nameVector.begin(), nameVector.end(), (*(*data)[i])[j].sensor) == nameVector.end()) {
                         trainingSet.push_back((*(*data)[i])[j].filename);
+                        trainingClass.push_back(classNumber((*(*data)[i])[j].classification));
                     } else {
                         testingSet.push_back((*(*data)[i])[j].filename);
+                        testingClass.push_back(classNumber((*(*data)[i])[j].classification));
                     }
                 }
             }
@@ -211,11 +235,154 @@ public:
         
         // Save files
         save(Dir);
+        
+        setsLoaded = true;
     }
     
     // Load the training feature set
-    void loadTraining(cv::Mat& output) {
+    void loadTraining(cv::Mat& outputFeatures, cv::Mat& outputLabels, string& trainingDir, string& featureLocation, int bitsize, int filtersize) {
+        if (setsLoaded) {
+            // Can move directly to loading features
+            // Allocate storage for the output features (rows = number of samples, columns = size of histogram)
+            outputFeatures.create((int)trainingSet.size(), pow(2,bitsize), CV_32FC1);
+            
+            // Load features
+            stringstream featureFilename;
+            featureFilename << featureLocation << "filter_" << filtersize << "_" << filtersize << "_" << bitsize;
+            ifstream featureFile(featureFilename.str());
+            CSVIterator featureCSV(featureFile);
+            
+            int i = 0;
+            
+            while (featureCSV != CSVIterator()) {
+                // If the current line includes a file from the training set
+                if (find(trainingSet.begin(), trainingSet.end(),(*featureCSV)[0]) != trainingSet.end()) {
+                    for (int j = 1; j < (*featureCSV).size(); j++) {
+                        outputFeatures.at<float>(i, (j-1)) = stoi((*featureCSV)[j]);
+                    }
+                    // Increment the output features counter
+                    i++;
+                }
+                // Increment the CSV line
+                featureCSV++;
+            }
+            
+            // Load classifications
+            outputLabels.create((int)trainingClass.size(), 1, CV_32SC1);
+            
+            for (int j = 0; j < trainingClass.size(); j++) {
+                outputLabels.at<int>(j, 0) = trainingClass[j];
+            }
+            
+        } else {
+            // Need to load saved sets before loading features
+            load(trainingDir);
+            // Allocate storage for the output features (rows = number of samples, columns = size of histogram)
+            outputFeatures.create((int)trainingSet.size(), pow(2,bitsize), CV_32FC1);
+            
+            // Load features
+            stringstream featureFilename;
+            featureFilename << featureLocation << "_filter_" << filtersize << "_" << filtersize << "_" << bitsize << ".csv";
+            ifstream featureFile(featureFilename.str());
+            CSVIterator featureCSV(featureFile);
+            
+            int i = 0;
+            
+            while (featureCSV != CSVIterator()) {
+                // If the current line includes a file from the training set
+                if (find(trainingSet.begin(), trainingSet.end(),(*featureCSV)[0]) != trainingSet.end()) {
+                    for (int j = 1; j < (*featureCSV).size(); j++) {
+                        outputFeatures.at<float>(i, (j-1)) = stoi((*featureCSV)[j]);
+                    }
+                    // Increment the output features counter
+                    i++;
+                }
+                // Increment the CSV line
+                featureCSV++;
+            }
+            
+            // Load classifications
+            outputLabels.create((int)trainingClass.size(), 1, CV_32SC1);
+            
+            for (int j = 0; j < trainingClass.size(); j++) {
+                outputLabels.at<int>(j, 0) = trainingClass[j];
+            }
         
+        }
+        
+        setsLoaded = true;
+    }
+    
+    void loadTesting(cv::Mat& outputFeatures, cv::Mat& outputLabels, string& trainingDir, string& featureLocation, int bitsize, int filtersize) {
+        if (setsLoaded) {
+            // Can move directly to loading features
+            // Allocate storage for the output features (rows = number of samples, columns = size of histogram)
+            outputFeatures.create((int)testingSet.size(), pow(2,bitsize), CV_32FC1);
+            
+            // Load features
+            stringstream featureFilename;
+            featureFilename << featureLocation << "_filter_" << filtersize << "_" << filtersize << "_" << bitsize << ".csv";
+            ifstream featureFile(featureFilename.str());
+            CSVIterator featureCSV(featureFile);
+            
+            int i = 0;
+            
+            while (featureCSV != CSVIterator()) {
+                // If the current line includes a file from the testing set
+                if (find(testingSet.begin(), testingSet.end(),(*featureCSV)[0]) != testingSet.end()) {
+                    for (int j = 1; j < (*featureCSV).size(); j++) {
+                        outputFeatures.at<float>(i, (j-1)) = stoi((*featureCSV)[j]);
+                    }
+                    // Increment the output features counter
+                    i++;
+                }
+                // Increment the CSV line
+                featureCSV++;
+            }
+            
+            // Load classifications
+            outputLabels.create((int)testingClass.size(), 1, CV_32SC1);
+            
+            for (int j = 0; j < testingClass.size(); j++) {
+                outputLabels.at<int>(j, 0) = testingClass[j];
+            }
+            
+        } else {
+            // Need to load saved sets before loading features
+            load(trainingDir);
+            // Allocate storage for the output features (rows = number of samples, columns = size of histogram)
+            outputFeatures.create((int)testingSet.size(), pow(2,bitsize), CV_32FC1);
+            
+            // Load features
+            stringstream featureFilename;
+            featureFilename << featureLocation << "_filter_" << filtersize << "_" << filtersize << "_" << bitsize << ".csv";
+            ifstream featureFile(featureFilename.str());
+            CSVIterator featureCSV(featureFile);
+            
+            int i = 0;
+            
+            while (featureCSV != CSVIterator()) {
+                // If the current line includes a file from the training set
+                if (find(testingSet.begin(), testingSet.end(),(*featureCSV)[0]) != testingSet.end()) {
+                    for (int j = 1; j < (*featureCSV).size(); j++) {
+                        outputFeatures.at<int>(i, (j-1)) = stoi((*featureCSV)[j]);
+                    }
+                    // Increment the output features counter
+                    i++;
+                }
+                // Increment the CSV line
+                featureCSV++;
+            }
+            
+            // Load classifications
+            outputLabels.create((int)testingClass.size(), 1, CV_32SC1);
+            
+            for (int j = 0; j < testingClass.size(); j++) {
+                outputLabels.at<int>(j, 0) = testingClass[j];
+            }
+            
+        }
+        setsLoaded = true;
     }
     
 private:
@@ -225,6 +392,10 @@ private:
     // List of filenames for each set
     vector<string> trainingSet;
     vector<string> testingSet;
+    
+    // List of classifications for each set
+    vector<int> trainingClass;
+    vector<int> testingClass;
     
     // Training set index list
     vector<int> trainingIdx;
@@ -293,14 +464,49 @@ private:
         ofstream train;
         train.open((Dir + "trainList.txt"), ios::out | ios::trunc);
         for (int i = 0; i < trainingSet.size(); i++) {
-            train << trainingSet[i] << endl;
+            train << trainingSet[i] << "," << trainingClass[i] << endl;
         }
         train.close();
         
         ofstream test;
         test.open((Dir + "testList.txt"), ios::out | ios::trunc);
         for (int j = 0; j < testingSet.size(); j++) {
-            test << testingSet[j] << endl;
+            test << testingSet[j] << "," << testingClass[j] << endl;
+        }
+    }
+    
+    void load(string& Dir) {
+        string currentName;
+        size_t location;
+        
+        // Training sets
+        ifstream train;
+        train.open(Dir + "trainList.txt");
+        
+        while (getline(train, currentName)) {
+            location = currentName.find(",");
+            trainingSet.push_back(currentName.substr(0, location));
+            trainingClass.push_back(stoi(currentName.substr((location + 1))));
+        }
+        train.close();
+        // Testing sets
+        ifstream test;
+        test.open(Dir + "testList.txt");
+        currentName = "";
+        
+        while (getline(test, currentName)) {
+            location = currentName.find(",");
+            testingSet.push_back(currentName.substr(0, location));
+            testingClass.push_back(stoi(currentName.substr((location + 1))));
+        }
+        test.close();
+    }
+    
+    int classNumber(string& classString) {
+        if (classString == "textured") {
+            return 1;
+        } else {
+            return 0;
         }
     }
 };
