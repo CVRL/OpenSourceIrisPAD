@@ -21,28 +21,19 @@ public:
     TCLManager(void) {
         // Associate lines of config file to attributes
         mapBool["Extract features"] = &extractFeatures;
-        mapBool["Separate sets"] = &separateSets;
         mapBool["Train model"] = &trainModel;
         mapBool["Test images"] = &testImages;
         
-        mapString["Database file"] = &inputDatabaseFilename;
-        mapString["Database directory"] = &inputDatabaseDir;
+        mapString["Split directory"] = &splitDir;
+        mapString["Training set filename"] = &trainingSetFilename;
+        mapString["Testing set filename"] = &testingSetFilename;
         mapString["Database image directory"] = &databaseImageDir;
+        
         mapString["Feature extraction destination file"] = &outputExtractionFilename;
         mapString["Feature extraction destination directory"] = &outputExtractionDir;
         mapString["Histogram output file"] = &outputHistFilename;
         mapString["Histogram output directory"] = &outputHistDir;
-        
-        mapString["SequenceID column name"] = &sequenceIDColumnName;
-        mapString["Format column name"] = &formatColumnName;
-        mapString["Subject column name"] = &subjectColumnName;
-        mapString["Texture column name"] = &textureColumnName;
-        mapString["Contacts column name"] = &contactsColumnName;
-        mapString["Tags column name"] = &tagsColumnName;
-        mapString["Manufacturer tag"] = &manufacturerTag;
-        mapString["Sensor column name"] = &sensorColumnName;
-
-        mapString["Set output directory"] = &setOutputDir;
+        mapString["Model output directory"] = &modelOutputDir;
         
         mapInt["Bitsize"] = &bitsize;
         
@@ -122,9 +113,6 @@ public:
         if (extractFeatures) {
             cout << "| Extract features | ";
         }
-        if (separateSets) {
-            cout << "| Create training set |";
-        }
         if (trainModel) {
             cout << "| Train model | ";
         }
@@ -136,18 +124,8 @@ public:
         
         if (extractFeatures) {
             cout << "=============" << endl;
-            cout << "- The database for feature extraction will be " << inputDatabaseFilename << endl;
             cout << "- Features will be stored in " << outputExtractionFilename << endl;
             cout << "=============" << endl;
-            
-            cout << "Database Parameters" << endl;
-            cout << "=============" << endl;
-            cout << "SequenceID: " << sequenceIDColumnName << endl;
-            cout << "Format: " << formatColumnName << endl;
-            cout << "Texture: "  << textureColumnName << endl;
-            cout << "Contacts: " << contactsColumnName << endl;
-            cout << "Tags: " << tagsColumnName << endl;
-            cout << "Manufacturer Tag: " << manufacturerTag << endl;
         }
         if (testImages) {
             cout << "- Testing features will be stored in " << outputHistFilename  + ".csv" << endl;
@@ -161,68 +139,34 @@ public:
         cout << "================" << endl ;
         cout << endl ;
         
+        loadSets();
+       
         if (extractFeatures) {
             std::cout << "Extracting features..." << std::endl;
-            sampleDatabase inputDatabase(inputDatabaseDir, inputDatabaseFilename);
-            inputDatabase.parseDatabaseCSV(sequenceIDColumnName, formatColumnName, subjectColumnName, textureColumnName, contactsColumnName, tagsColumnName, manufacturerTag, sensorColumnName);
-            inputDatabase.save(outputExtractionDir);
             
+            // Declare new feature extractor
             featureExtractor newExtractor(bitsize);
-            newExtractor.extract(outputExtractionDir, outputExtractionFilename, databaseImageDir, inputDatabase);
             
-            // Separate the sets if required
-            if (separateSets) {
-                std::cout << "Creating training set..." << std::endl;
-                // No need to reload inputDatabase, can use the one defined above
-                
-                // Separate, not subject disjoint
-                //testSeparator newSets(loadDatabase);
-                //newSets.separate(false, 6000, setOutputDir);
-                
-                // Separate as subject disjoint
-                //testSeparator newSets(inputDatabase);
-                //newSets.separate(true, 6000, setOutputDir);
-                
-                // Separate with specific requirements
-                //testSeparator newSets(inputDatabase);
-                
-            }
+            // Extract
+            newExtractor.extract(outputExtractionDir, outputExtractionFilename, databaseImageDir, trainingSet, testingSet);
+            
         }
         
-        if (separateSets && !extractFeatures) {
-            std::cout << "Creating training set..." << std::endl;
-            
-            // Need to reload the inputDatabase
-            sampleDatabase loadDatabase(outputExtractionDir);
-            loadDatabase.load();
-            
-            // Separate, not subject disjoint
-            testSeparator newSets(loadDatabase);
-            newSets.separate(false, 6000, setOutputDir);
-            
-            // Separate as subject disjoint
-            //testSeparator newSets(loadDatabase);
-            //newSets.separate(true, 6000, setOutputDir);
-            
-            // Separate with specific requirements
-            //testSeparator newSets(loadDatabase);
-            //newSets.separate("exclude-m", "CibaVision,Coopervision", 6000, setOutputDir);
-        }
         
         if (trainModel) {
             std::cout << "Training SVM..." << std::endl;
             
-            // Load from previously saved split (currently need to initialize with database, so create temp one)
-            sampleDatabase noData(outputExtractionDir);
-            testSeparator loadSets(noData);
-            
+            // Load training data
             cv::Mat featuresTrain;
             cv::Mat classesTrain;
-            string combined = outputExtractionDir + outputExtractionFilename;
             
-            // Load features and classes from split
-            loadSets.loadTraining(featuresTrain, classesTrain, setOutputDir, combined, bitsize, 18);
+            loadTraining(featuresTrain, classesTrain, 16);
+           
+            // Load test data
+            cv::Mat featuresTest;
+            cv::Mat classesTest;
             
+            loadTesting(featuresTest, classesTest, 16);
             
             // Create new SVM and train
             Ptr<SVM> svmPoly2 = SVM::create();
@@ -231,13 +175,6 @@ public:
             svmPoly2->setDegree(2);
             svmPoly2->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 10000, 1e-6));
             svmPoly2->train(featuresTrain, ROW_SAMPLE, classesTrain);
-            
-            
-            // Load test data
-            cv::Mat featuresTest;
-            cv::Mat classesTest;
-            
-            loadSets.loadTesting(featuresTest, classesTest, setOutputDir, combined, bitsize, 18);
             
             // Predict with SVM
             cv::Mat predictions2(classesTest.rows, classesTest.cols, CV_32SC1);
@@ -287,7 +224,7 @@ public:
             svmPoly4->setDegree(4);
             svmPoly4->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 10000, 1e-6));
             svmPoly4->train(featuresTrain, ROW_SAMPLE, classesTrain);
-            svmPoly4->save(setOutputDir + "savedSVM");
+            svmPoly4->save(modelOutputDir + "savedSVM");
             
             // Predict with SVM
             cv::Mat predictions4(classesTest.rows, classesTest.cols, CV_32SC1);
@@ -362,71 +299,163 @@ private:
     
     // Commands
     bool extractFeatures;
-    bool separateSets;
     bool trainModel;
     bool testImages;
     
     
     // Inputs
-    std::string inputDatabaseFilename;
-    std::string inputDatabaseDir;
     std::string databaseImageDir;
+    std::string splitDir;
+    std::string trainingSetFilename;
+    std::string testingSetFilename;
     
     // Outputs
     std::string outputExtractionFilename;
     std::string outputExtractionDir;
     std::string outputHistFilename;
     std::string outputHistDir;
-    std::string setOutputDir;
+    std::string modelOutputDir;
     
     
     // Parameters
     int bitsize;
-    std::string sequenceIDColumnName;
-    std::string formatColumnName;
-    std::string subjectColumnName;
-    std::string textureColumnName;
-    std::string contactsColumnName;
-    std::string tagsColumnName;
-    std::string manufacturerTag;
-    std::string sensorColumnName;
     
     // Maps to associate a string (conf file) to a variable (pointer)
     std::map<std::string,bool*> mapBool;
     std::map<std::string,int*> mapInt;
     std::map<std::string,std::string*> mapString;
     
+    // List of filenames for each set
+    vector<string> trainingSet;
+    vector<string> testingSet;
+    
+    // List of classifications for each set
+    vector<int> trainingClass;
+    vector<int> testingClass;
+    
     // Initialize all parameters
     void initConfig(void) {
         // Commands
         extractFeatures = false;
-        separateSets = false;
         trainModel = false;
         testImages = false;
         
         // Inputs
-        inputDatabaseFilename = "";
-        inputDatabaseDir = "";
         databaseImageDir = "";
+        splitDir = "";
+        trainingSetFilename = "";
+        testingSetFilename = "";
         
         // Outputs
         outputExtractionFilename = "";
         outputExtractionDir = "";
         outputHistFilename = "";
         outputHistDir = "";
-        setOutputDir = "";
+        modelOutputDir = "";
         
         // Parameters
         bitsize = 8;
+    }
+    
+    void loadSets(void) {
+        string currentName;
+        size_t location;
         
-        sequenceIDColumnName = "";
-        formatColumnName = "";
-        subjectColumnName = "";
-        textureColumnName = "";
-        contactsColumnName = "";
-        tagsColumnName = "";
-        manufacturerTag = "";
-        sensorColumnName = "";
+        // Training sets
+        ifstream train;
+        train.open(splitDir + trainingSetFilename);
+        
+        while (getline(train, currentName)) {
+            location = currentName.find(",");
+            trainingSet.push_back(currentName.substr(0, location));
+            trainingClass.push_back(stoi(currentName.substr((location + 1))));
+        }
+        train.close();
+        
+        // Testing sets
+        ifstream test;
+        test.open(splitDir + testingSetFilename);
+        currentName = "";
+        
+        while (getline(test, currentName)) {
+            location = currentName.find(",");
+            testingSet.push_back(currentName.substr(0, location));
+            testingClass.push_back(stoi(currentName.substr((location + 1))));
+        }
+        test.close();
+        
+    }
+    
+    void loadTraining(cv::Mat& outputFeatures, cv::Mat& outputLabels, int filtersize) {
+        
+            // Allocate storage for the output features (rows = number of samples, columns = size of histogram)
+            outputFeatures.create((int)trainingSet.size(), pow(2,bitsize), CV_32FC1);
+            
+            // Load features
+            stringstream featureFilename;
+            featureFilename << outputExtractionDir << outputExtractionFilename << "_filter_" << filtersize << "_" << filtersize << "_" << bitsize << ".csv";
+            ifstream featureFile(featureFilename.str());
+            CSVIterator featureCSV(featureFile);
+            
+            int i = 0;
+            
+            while (featureCSV != CSVIterator()) {
+                // If the current line includes a file from the testing set
+                if (find(trainingSet.begin(), trainingSet.end(),(*featureCSV)[0]) != trainingSet.end()) {
+                    // Start at 1 to ignore filename column
+                    for (int j = 1; j < (*featureCSV).size(); j++) {
+                        outputFeatures.at<float>(i, (j-1)) = stoi((*featureCSV)[j]);
+                    }
+                    // Increment the output features counter
+                    i++;
+                }
+                // Increment the CSV line
+                featureCSV++;
+            }
+            
+            // Load classifications
+            outputLabels.create((int)trainingClass.size(), 1, CV_32SC1);
+            
+            for (int j = 0; j < trainingClass.size(); j++) {
+                outputLabels.at<int>(j, 0) = trainingClass[j];
+            }
+            
+        }
+    
+    void loadTesting(cv::Mat& outputFeatures, cv::Mat& outputLabels, int filtersize) {
+        
+        // Allocate storage for the output features (rows = number of samples, columns = size of histogram)
+        outputFeatures.create((int)testingSet.size(), pow(2,bitsize), CV_32FC1);
+        
+        // Load features
+        stringstream featureFilename;
+        featureFilename << outputExtractionDir << outputExtractionFilename << "_filter_" << filtersize << "_" << filtersize << "_" << bitsize << ".csv";
+        ifstream featureFile(featureFilename.str());
+        CSVIterator featureCSV(featureFile);
+        
+        int i = 0;
+        
+        while (featureCSV != CSVIterator()) {
+            // If the current line includes a file from the testing set
+            if (find(testingSet.begin(), testingSet.end(),(*featureCSV)[0]) != testingSet.end()) {
+                // Start at 1 to ignore filename column
+                for (int j = 1; j < (*featureCSV).size(); j++) {
+                    outputFeatures.at<float>(i, (j-1)) = stoi((*featureCSV)[j]);
+                }
+                // Increment the output features counter
+                i++;
+            }
+            // Increment the CSV line
+            featureCSV++;
+        }
+        
+        // Load classifications
+        outputLabels.create((int)testingClass.size(), 1, CV_32SC1);
+        
+        for (int j = 0; j < testingClass.size(); j++) {
+            outputLabels.at<int>(j, 0) = trainingClass[j];
+        }
+        
     }
 };
 
