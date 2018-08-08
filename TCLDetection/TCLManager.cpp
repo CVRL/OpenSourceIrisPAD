@@ -160,13 +160,13 @@ public:
             cv::Mat featuresTrain;
             cv::Mat classesTrain;
             
-            loadTraining(featuresTrain, classesTrain, 16);
+            loadTraining(featuresTrain, classesTrain, 3);
            
             // Load test data
             cv::Mat featuresTest;
             cv::Mat classesTest;
             
-            loadTesting(featuresTest, classesTest, 16);
+            loadTesting(featuresTest, classesTest, 3);
             
             // Create new SVM and train
             Ptr<SVM> svmPoly2 = SVM::create();
