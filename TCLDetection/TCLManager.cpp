@@ -161,7 +161,7 @@ public:
             cv::Mat classesTrain;
             
             loadTraining(featuresTrain, classesTrain, 3);
-           
+            
             // Load test data
             cv::Mat featuresTest;
             cv::Mat classesTest;
@@ -453,7 +453,7 @@ private:
         outputLabels.create((int)testingClass.size(), 1, CV_32SC1);
         
         for (int j = 0; j < testingClass.size(); j++) {
-            outputLabels.at<int>(j, 0) = trainingClass[j];
+            outputLabels.at<int>(j, 0) = testingClass[j];
         }
         
     }
