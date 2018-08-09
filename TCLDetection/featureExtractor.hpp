@@ -9,14 +9,16 @@
 #define featureExtractor_hpp
 
 #include <stdio.h>
+#include <iostream>
+#include <fstream>
 #include "BSIFFilter.hpp"
-#include "sampleDatabase.hpp"
+
 
 class featureExtractor {
 public:
     featureExtractor(int bits);
     
-    void extract(std::string& outDir, std::string& outName, std::string& imageDir, vector<string>& training, vector<string>& testing);
+    void extract(std::string& outDir, std::string& outName, std::string& imageDir, std::vector<std::string>& training, std::vector<std::string>& testing);
     
 private:
     // Filter information
@@ -29,7 +31,7 @@ private:
     std::string imageLocation;
     
     // List of filenames
-    std::vector<string> filenames;
+    std::vector<std::string> filenames;
     
     // Function produces features for filter size and its double (through downsampling)
     void filter(int filterSize);

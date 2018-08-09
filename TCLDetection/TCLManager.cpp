@@ -8,9 +8,8 @@
 #include <map>
 #include <opencv2/ml/ml.hpp>
 #include "OsiStringUtils.h"
-#include "sampleDatabase.hpp"
 #include "featureExtractor.hpp"
-#include "testSeparator.cpp"
+#include "CSVIterator.hpp"
 
 using namespace std;
 using namespace cv;

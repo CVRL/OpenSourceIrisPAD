@@ -8,6 +8,8 @@
 #include "featureExtractor.hpp"
 
 
+using namespace std;
+
 featureExtractor::featureExtractor(int bits) : bitsize(bits){}
     
 void featureExtractor::extract(std::string& outDir, std::string& outName, std::string& imageDir, vector<string>& training, vector<string>& testing) {
