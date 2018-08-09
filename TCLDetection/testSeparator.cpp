@@ -481,7 +481,7 @@ private:
         
         // Training sets
         ifstream train;
-        train.open(Dir + "trainList.txt");
+        train.open(Dir + "trainList.csv");
         
         while (getline(train, currentName)) {
             location = currentName.find(",");
@@ -491,7 +491,7 @@ private:
         train.close();
         // Testing sets
         ifstream test;
-        test.open(Dir + "testList.txt");
+        test.open(Dir + "testList.csv");
         currentName = "";
         
         while (getline(test, currentName)) {

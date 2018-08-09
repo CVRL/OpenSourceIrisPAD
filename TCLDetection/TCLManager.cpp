@@ -221,7 +221,7 @@ public:
             string combined = outputExtractionDir + outputExtractionFilename;
             
             // Load features and classes from split
-            loadSets.loadTraining(featuresTrain, classesTrain, setOutputDir, combined, bitsize, 18);
+            loadSets.loadTraining(featuresTrain, classesTrain, setOutputDir, combined, bitsize, 3);
             
             
             // Create new SVM and train
@@ -237,7 +237,7 @@ public:
             cv::Mat featuresTest;
             cv::Mat classesTest;
             
-            loadSets.loadTesting(featuresTest, classesTest, setOutputDir, combined, bitsize, 18);
+            loadSets.loadTesting(featuresTest, classesTest, setOutputDir, combined, bitsize, 3);
             
             // Predict with SVM
             cv::Mat predictions2(classesTest.rows, classesTest.cols, CV_32SC1);
