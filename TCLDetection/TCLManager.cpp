@@ -29,6 +29,7 @@ public:
         mapString["Database image directory"] = &databaseImageDir;
         mapString["Training sizes"] = &trainingSizes;
         mapString["Kernel type"] = &kernelType;
+        mapString["Parameters"] = &parameterString;
         
         
         mapString["Feature extraction destination file"] = &outputExtractionFilename;
@@ -39,9 +40,6 @@ public:
         
         
         mapInt["Bitsize"] = &bitsize;
-        
-        mapDouble["Polynomial degree"] = &degree;
-        mapDouble["Gamma"] = &gamma;
         
         // Initialize
         initConfig();
@@ -98,10 +96,6 @@ public:
                         else if ( mapString.find(key) != mapString.end() )
                             *mapString[key] = osu.convertSlashes(value) ;
                         
-                        // Option is type double
-                        else if ( mapDouble.find(key) != mapDouble.end() )
-                            *mapDouble[key] = osu.fromString<double>(value) ;
-                        
                         // Option is not stored in any mMap
                         else
                             cout << "Unknown option in configuration file : " << line << endl ;
@@ -117,6 +111,13 @@ public:
         
         while (getline(modelStream, currentNum, ',')) {
             modelSizes.push_back(stoi(currentNum));
+        }
+        
+        // Determine model parameters from trainingSizes string
+        std::stringstream parameterStream(parameterString);
+        
+        while (getline(parameterStream, currentNum, ',')) {
+            modelParameter.push_back(stod(currentNum));
         }
         
     }
@@ -194,166 +195,26 @@ public:
                     // Set parameters
                     svmPoly->setType(SVM::C_SVC);
                     svmPoly->setKernel(SVM::POLY);
-                    svmPoly->setDegree(degree);
+                    svmPoly->setDegree(modelParameter[i]);
                     svmPoly->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 10000, 1e-6));
                     
                     svmPoly->train(featuresTrain, ROW_SAMPLE, classesTrain);
                     
-                    svmPoly->save(modelOutputDir + generateFilename(modelSizes[i]));
+                    svmPoly->save(modelOutputDir + generateFilename(i));
                 } else if (kernelType == "GAUSS") {
                     Ptr<SVM> svmGauss = SVM::create();
                     
                     // Set parameters
                     svmGauss->setType(SVM::C_SVC);
                     svmGauss->setKernel(SVM::RBF);
-                    svmGauss->setGamma(gamma);
+                    svmGauss->setGamma(modelParameter[i]);
                     svmGauss->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 10000, 1e-6));
                     
                     svmGauss->train(featuresTrain, ROW_SAMPLE, classesTrain);
                     
-                    svmGauss->save(modelOutputDir + generateFilename(modelSizes[i]));
+                    svmGauss->save(modelOutputDir + generateFilename(i));
                 }
             }
-            
-            // Load from previously saved split (currently need to initialize with database, so create temp one)
-            sampleDatabase noData(outputExtractionDir);
-            testSeparator loadSets(noData);
-            
-            cv::Mat featuresTrain;
-            cv::Mat classesTrain;
-            string combined = outputExtractionDir + outputExtractionFilename;
-            
-            // Load features and classes from split
-            loadSets.loadTraining(featuresTrain, classesTrain, setOutputDir, combined, bitsize, 3);
-            
-            
-            // Create new SVM and train
-            Ptr<SVM> svmPoly2 = SVM::create();
-            svmPoly2->setType(SVM::C_SVC);
-            svmPoly2->setKernel(SVM::POLY);
-            svmPoly2->setDegree(2);
-            svmPoly2->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 10000, 1e-6));
-            svmPoly2->train(featuresTrain, ROW_SAMPLE, classesTrain);
-            
-            
-            // Load test data
-            cv::Mat featuresTest;
-            cv::Mat classesTest;
-            
-            loadSets.loadTesting(featuresTest, classesTest, setOutputDir, combined, bitsize, 3);
-            
-            // Predict with SVM
-            cv::Mat predictions2(classesTest.rows, classesTest.cols, CV_32SC1);
-            float accuracy = 0;
-            
-            svmPoly2->predict(featuresTest, predictions2);
-            for (int i = 0; i < classesTest.rows; i++) {
-                if ((int)predictions2.at<float>(i,0) != classesTest.at<int>(i,0)) {
-                    accuracy++;
-                }
-            }
-            
-            cout << "POLY-2" << endl;
-            cout << "Number incorrect: " << accuracy << endl;
-            accuracy /= classesTest.rows;
-            cout << "Percentage incorrect: " << (accuracy * 100) << endl;
-            
-            
-            //Create new SVM and train
-            Ptr<SVM> svmPoly3 = SVM::create();
-            svmPoly3->setType(SVM::C_SVC);
-            svmPoly3->setKernel(SVM::POLY);
-            svmPoly3->setDegree(3);
-            svmPoly3->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 10000, 1e-6));
-            svmPoly3->train(featuresTrain, ROW_SAMPLE, classesTrain);
-            
-            
-            // Predict with SVM
-            cv::Mat predictions3(classesTest.rows, classesTest.cols, CV_32SC1);
-            accuracy = 0;
-            
-            svmPoly3->predict(featuresTest, predictions3);
-            for (int i = 0; i < classesTest.rows; i++) {
-                if ((int)predictions3.at<float>(i,0) != classesTest.at<int>(i,0)) {
-                    accuracy++;
-                }
-            }
-            cout << "POLY-3" << endl;
-            cout << "Number incorrect: " << accuracy << endl;
-            accuracy /= classesTest.rows;
-            cout << "Percentage incorrect: " << (accuracy * 100) << endl;
-            
-            //Create new SVM and train
-            Ptr<SVM> svmPoly4 = SVM::create();
-            svmPoly4->setType(SVM::C_SVC);
-            svmPoly4->setKernel(SVM::POLY);
-            svmPoly4->setDegree(4);
-            svmPoly4->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 10000, 1e-6));
-            svmPoly4->train(featuresTrain, ROW_SAMPLE, classesTrain);
-            svmPoly4->save(modelOutputDir + "savedSVM");
-            
-            // Predict with SVM
-            cv::Mat predictions4(classesTest.rows, classesTest.cols, CV_32SC1);
-            accuracy = 0;
-            
-            svmPoly4->predict(featuresTest, predictions4);
-            for (int i = 0; i < classesTest.rows; i++) {
-                if ((int)predictions4.at<float>(i,0) != classesTest.at<int>(i,0)) {
-                    accuracy++;
-                }
-            }
-            cout << "POLY-4" << endl;
-            cout << "Number incorrect: " << accuracy << endl;
-            accuracy /= classesTest.rows;
-            cout << "Percentage incorrect: " << (accuracy * 100) << endl;
-            
-            //Create new SVM and train
-            Ptr<SVM> svmPoly5 = SVM::create();
-            svmPoly5->setType(SVM::C_SVC);
-            svmPoly5->setKernel(SVM::POLY);
-            svmPoly5->setDegree(5);
-            svmPoly5->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 10000, 1e-6));
-            svmPoly5->train(featuresTrain, ROW_SAMPLE, classesTrain);
-            
-            
-            // Predict with SVM
-            cv::Mat predictions5(classesTest.rows, classesTest.cols, CV_32SC1);
-            accuracy = 0;
-            
-            svmPoly5->predict(featuresTest, predictions5);
-            for (int i = 0; i < classesTest.rows; i++) {
-                if ((int)predictions5.at<float>(i,0) != classesTest.at<int>(i,0)) {
-                    accuracy++;
-                }
-            }
-            cout << "POLY-5" << endl;
-            cout << "Number incorrect: " << accuracy << endl;
-            accuracy /= classesTest.rows;
-            cout << "Percentage incorrect: " << (accuracy * 100) << endl;
-            
-            //Create new SVM and train
-            Ptr<SVM> svmGauss = SVM::create();
-            svmGauss->setType(SVM::C_SVC);
-            svmGauss->setKernel(SVM::RBF);
-            svmGauss->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 10000, 1e-6));
-            svmGauss->train(featuresTrain, ROW_SAMPLE, classesTrain);
-            
-            
-            // Predict with SVM
-            cv::Mat predictions6(classesTest.rows, classesTest.cols, CV_32FC1);
-            accuracy = 0;
-            
-            svmGauss->predict(featuresTest, predictions6);
-            for (int i = 0; i < classesTest.rows; i++) {
-                if ((int)predictions6.at<float>(i,0) != classesTest.at<int>(i,0)) {
-                    accuracy++;
-                }
-            }
-            cout << "RBF" << endl;
-            cout << "Number incorrect: " << accuracy << endl;
-            accuracy /= classesTest.rows;
-            cout << "Percentage incorrect: " << (accuracy * 100) << endl;
-            */
         }
         
         if (testImages) {
@@ -365,17 +226,17 @@ public:
             // Loop through modelSize vector
             for (int i = 0; i < modelSizes.size(); i++) {
                 // Check if file exists
-                ifstream nextFile(modelOutputDir + generateFilename(modelSizes[i]));
+                ifstream nextFile(modelOutputDir + generateFilename(i));
                 
                 if (nextFile.good()) {
                     // Load SVM
-                    Ptr<SVM> currentSVM = Algorithm::load<SVM>(modelOutputDir + generateFilename(modelSizes[i]));
+                    Ptr<SVM> currentSVM = Algorithm::load<SVM>(modelOutputDir + generateFilename(i));
                     
                     // Add to list of models
                     testingModels.push_back(currentSVM);
                     
                 } else {
-                    std::cout << "Model \"" << generateFilename(modelSizes[i]) << "\" not found." << endl;
+                    std::cout << "Model \"" << generateFilename(i) << "\" not found." << endl;
                     std::cout << "Please make sure all models have been trained." << endl;
                 }
             }
@@ -460,6 +321,8 @@ private:
     std::string trainingSizes;
     std::vector<int> modelSizes;
     std::string kernelType;
+    std::string parameterString;
+    std::vector<double> modelParameter;
     
     // Outputs
     std::string outputExtractionFilename;
@@ -470,14 +333,11 @@ private:
     
     // Parameters
     int bitsize;
-    double gamma;
-    double degree;
     
     // Maps to associate a string (conf file) to a variable (pointer)
     std::map<std::string,bool*> mapBool;
     std::map<std::string,int*> mapInt;
     std::map<std::string,std::string*> mapString;
-    std::map<std::string, double*> mapDouble;
     
     // List of filenames for each set
     vector<string> trainingSet;
@@ -502,6 +362,7 @@ private:
         testingSetFilename = "";
         trainingSizes = "";
         kernelType = "";
+        parameterString = "";
         
         // Outputs
         outputExtractionFilename = "";
@@ -512,8 +373,6 @@ private:
         
         // Parameters
         bitsize = 8;
-        gamma = .25;
-        degree = 2;
     }
     
     // Loads the training/testing image names indicated in the config file
@@ -622,14 +481,14 @@ private:
         
     }
     
-    std::string generateFilename(int size) {
+    std::string generateFilename(int i) {
         // Initialize new filename stringstream
         std::stringstream newFilename;
         
         if (kernelType == "POLY") {
-            newFilename <<  "svm-BSIF-" << size << "-" << kernelType << "-" << "degree" << "-" << degree << ".xml";
+            newFilename <<  "svm-BSIF-" << modelSizes[i] << "-" << kernelType << "-" << "degree" << "-" << modelParameter[i] << ".xml";
         } else if (kernelType == "GAUSS") {
-            newFilename <<  "svm-BSIF-" << size << "-" << kernelType << "-" << "gamma" << "-" << gamma << ".xml";
+            newFilename <<  "svm-BSIF-" << modelSizes[i] << "-" << kernelType << "-" << "gamma" << "-" << modelParameter[i] << ".xml";
         }
         
         return newFilename.str();
