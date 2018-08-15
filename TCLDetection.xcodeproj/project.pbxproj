@@ -30,6 +30,7 @@
 /* Begin PBXFileReference section */
 		B23638FE210BBCF30050597B /* featureExtractor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = featureExtractor.cpp; sourceTree = "<group>"; };
 		B23638FF210BBCF30050597B /* featureExtractor.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = featureExtractor.hpp; sourceTree = "<group>"; };
+		B238CC132124D2D7002E70A4 /* configuration.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = configuration.ini; sourceTree = SOURCE_ROOT; };
 		B27A52E220FE8F0B005F8D93 /* TCLManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TCLManager.cpp; sourceTree = "<group>"; };
 		B281CF3A2103D40C00688B67 /* OsiStringUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OsiStringUtils.h; sourceTree = "<group>"; };
 		B2A168E520F669A20021139E /* TCLDetection */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TCLDetection; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -57,6 +58,7 @@
 		B2A168DC20F669A10021139E = {
 			isa = PBXGroup;
 			children = (
+				B238CC132124D2D7002E70A4 /* configuration.ini */,
 				B2A168E720F669A20021139E /* TCLDetection */,
 				B2A168E620F669A20021139E /* Products */,
 			);
