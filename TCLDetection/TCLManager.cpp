@@ -35,8 +35,6 @@ public:
         
         mapString["Feature extraction destination file"] = &outputExtractionFilename;
         mapString["Feature extraction destination directory"] = &outputExtractionDir;
-        mapString["Histogram output file"] = &outputHistFilename;
-        mapString["Histogram output directory"] = &outputHistDir;
         mapString["Model output directory"] = &modelOutputDir;
         
         
@@ -114,7 +112,7 @@ public:
             modelSizes.push_back(stoi(currentNum));
         }
         
-        // Determine model parameters from trainingSizes string
+        // Determine model parameters from parameterString
         std::stringstream parameterStream(parameterString);
         
         while (getline(parameterStream, currentNum, ',')) {
@@ -386,8 +384,6 @@ private:
     // Outputs
     std::string outputExtractionFilename;
     std::string outputExtractionDir;
-    std::string outputHistFilename;
-    std::string outputHistDir;
     std::string modelOutputDir;
     
     // Parameters
@@ -427,8 +423,6 @@ private:
         // Outputs
         outputExtractionFilename = "";
         outputExtractionDir = "";
-        outputHistFilename = "";
-        outputHistDir = "";
         modelOutputDir = "";
         
         // Parameters
