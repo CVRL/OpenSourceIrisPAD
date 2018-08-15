@@ -27,6 +27,9 @@ public:
         mapString["Training set filename"] = &trainingSetFilename;
         mapString["Testing set filename"] = &testingSetFilename;
         mapString["Database image directory"] = &databaseImageDir;
+        mapString["Training sizes"] = &trainingSizes;
+        mapString["Kernel type"] = &kernelType;
+        
         
         mapString["Feature extraction destination file"] = &outputExtractionFilename;
         mapString["Feature extraction destination directory"] = &outputExtractionDir;
@@ -34,7 +37,11 @@ public:
         mapString["Histogram output directory"] = &outputHistDir;
         mapString["Model output directory"] = &modelOutputDir;
         
+        
         mapInt["Bitsize"] = &bitsize;
+        
+        mapDouble["Polynomial degree"] = &degree;
+        mapDouble["Gamma"] = &gamma;
         
         // Initialize
         initConfig();
@@ -91,12 +98,25 @@ public:
                         else if ( mapString.find(key) != mapString.end() )
                             *mapString[key] = osu.convertSlashes(value) ;
                         
+                        // Option is type double
+                        else if ( mapDouble.find(key) != mapDouble.end() )
+                            *mapDouble[key] = osu.fromString<double>(value) ;
+                        
                         // Option is not stored in any mMap
                         else
                             cout << "Unknown option in configuration file : " << line << endl ;
                     }
                 }
             }
+        }
+        
+        // Determine models from trainingSizes string
+        std::stringstream modelStream(trainingSizes);
+        
+        std::string currentNum;
+        
+        while (getline(modelStream, currentNum, ',')) {
+            modelSizes.push_back(stoi(currentNum));
         }
         
     }
@@ -123,12 +143,13 @@ public:
         
         if (extractFeatures) {
             cout << "=============" << endl;
-            cout << "- Features will be stored in " << outputExtractionFilename << endl;
+            cout << "- Features will be stored in directory: " << outputExtractionDir << endl;
+            cout << "- Feature filenames will be in format: " << outputExtractionFilename + "_filter_size_size_bits.csv" << endl;
             cout << "=============" << endl;
         }
-        if (testImages) {
-            cout << "- Testing features will be stored in " << outputHistFilename  + ".csv" << endl;
-        }
+        //if (testImages) {
+        //    cout << "- Testing features will be stored in " << outputHistFilename  + ".csv" << endl;
+        //}
     }
     
     void run(void) {
@@ -154,27 +175,53 @@ public:
         
         if (trainModel) {
             std::cout << "Training SVM..." << std::endl;
+          
+            // Loop through modelSizes vector to train required models
+            for (int i = 0; i < modelSizes.size(); i++) {
+                std::cout << "BSIF size " << modelSizes[i] << "..." << endl;
+                
+                // Load training data for current size
+                cv::Mat featuresTrain;
+                cv::Mat classesTrain;
+                
+                loadTraining(featuresTrain, classesTrain, modelSizes[i]);
+                
+                
+                // Create new SVM and train
+                if (kernelType == "POLY") {
+                    Ptr<SVM> svmPoly = SVM::create();
+                    
+                    // Set parameters
+                    svmPoly->setType(SVM::C_SVC);
+                    svmPoly->setKernel(SVM::POLY);
+                    svmPoly->setDegree(degree);
+                    svmPoly->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 10000, 1e-6));
+                    
+                    svmPoly->train(featuresTrain, ROW_SAMPLE, classesTrain);
+                    
+                    svmPoly->save(modelOutputDir + generateFilename(modelSizes[i]));
+                } else if (kernelType == "GAUSS") {
+                    Ptr<SVM> svmGauss = SVM::create();
+                    
+                    // Set parameters
+                    svmGauss->setType(SVM::C_SVC);
+                    svmGauss->setKernel(SVM::RBF);
+                    svmGauss->setGamma(gamma);
+                    svmGauss->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 10000, 1e-6));
+                    
+                    svmGauss->train(featuresTrain, ROW_SAMPLE, classesTrain);
+                    
+                    svmGauss->save(modelOutputDir + generateFilename(modelSizes[i]));
+                }
+            }
             
-            // Load training data
-            cv::Mat featuresTrain;
-            cv::Mat classesTrain;
-            
-            loadTraining(featuresTrain, classesTrain, 3);
-            
-            // Load test data
-            cv::Mat featuresTest;
-            cv::Mat classesTest;
-            
-            loadTesting(featuresTest, classesTest, 3);
-            
-            // Create new SVM and train
-            Ptr<SVM> svmPoly2 = SVM::create();
-            svmPoly2->setType(SVM::C_SVC);
-            svmPoly2->setKernel(SVM::POLY);
-            svmPoly2->setDegree(2);
-            svmPoly2->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 10000, 1e-6));
-            svmPoly2->train(featuresTrain, ROW_SAMPLE, classesTrain);
-            
+            // Save models
+            /*
+             // Load test data
+             cv::Mat featuresTest;
+             cv::Mat classesTest;
+             
+             loadTesting(featuresTest, classesTest, 3);
             // Predict with SVM
             cv::Mat predictions2(classesTest.rows, classesTest.cols, CV_32SC1);
             float accuracy = 0;
@@ -286,12 +333,95 @@ public:
             cout << "Number incorrect: " << accuracy << endl;
             accuracy /= classesTest.rows;
             cout << "Percentage incorrect: " << (accuracy * 100) << endl;
-            
+            */
         }
         
         if (testImages) {
             std::cout << "Testing images..." << std::endl;
-        }
+            
+            // Need to load all models into vector
+            std::vector<Ptr<SVM>> testingModels;
+            
+            // Loop through modelSize vector
+            for (int i = 0; i < modelSizes.size(); i++) {
+                // Check if file exists
+                ifstream nextFile(modelOutputDir + generateFilename(modelSizes[i]));
+                
+                if (nextFile.good()) {
+                    // Load SVM
+                    Ptr<SVM> currentSVM = Algorithm::load<SVM>(modelOutputDir + generateFilename(modelSizes[i]));
+                    
+                    // Add to list of models
+                    testingModels.push_back(currentSVM);
+                    
+                } else {
+                    std::cout << "Model \"" << generateFilename(modelSizes[i]) << "\" not found." << endl;
+                    std::cout << "Please make sure all models have been trained." << endl;
+                }
+            }
+            
+            // Test performance (majority voting)
+            // Mat objects for testing data
+            cv::Mat featuresTest;
+            cv::Mat classesTest;
+            
+            // Results vector
+            vector<cv::Mat> results;
+            
+            for (int i = 0; i < testingModels.size(); i++) {
+                // Load testing features
+                loadTesting(featuresTest, classesTest, modelSizes[i]);
+                
+                // New Mat for results
+                cv::Mat individualResults(classesTest.rows, classesTest.cols, CV_32FC1);
+                
+                // Predict using model
+                testingModels[i]->predict(featuresTest, individualResults);
+                
+                // Add results to results vector
+                results.push_back(individualResults);
+            }
+            
+            
+            // Perform majority voting
+            vector<int> overallResult;
+            
+            int numIncorrect = 0;
+            
+            for (int i = 0; i < testingClass.size(); i++) {
+                // Variables to count number of votes for or against
+                int textured = 0;
+                int other = 0;
+                
+                // Loop through results vector
+                for (int j = 0; j < results.size(); j++) {
+                    if (results[j].at<float>(i,0) == 1) {
+                        textured++;
+                    } else {
+                        other++;
+                    }
+                }
+                
+                // Determine result by majority voting
+                if (textured > 0) {
+                    overallResult.push_back(1);
+                } else {
+                    overallResult.push_back(0);
+                }
+                
+                // Determine if incorrect
+                if (overallResult[i] != testingClass[i]) {
+                    numIncorrect++;
+                }
+            }
+            
+            // Output accuracy
+            cout << "The total number incorrect is: " << numIncorrect << endl;
+            
+            float ccr = 100 - ((float)numIncorrect / testingClass.size()) * 100;
+            cout << "CCR: " << ccr << endl;
+            
+         }
     }
     
 private:
@@ -307,6 +437,9 @@ private:
     std::string splitDir;
     std::string trainingSetFilename;
     std::string testingSetFilename;
+    std::string trainingSizes;
+    std::vector<int> modelSizes;
+    std::string kernelType;
     
     // Outputs
     std::string outputExtractionFilename;
@@ -315,14 +448,16 @@ private:
     std::string outputHistDir;
     std::string modelOutputDir;
     
-    
     // Parameters
     int bitsize;
+    double gamma;
+    double degree;
     
     // Maps to associate a string (conf file) to a variable (pointer)
     std::map<std::string,bool*> mapBool;
     std::map<std::string,int*> mapInt;
     std::map<std::string,std::string*> mapString;
+    std::map<std::string, double*> mapDouble;
     
     // List of filenames for each set
     vector<string> trainingSet;
@@ -331,6 +466,7 @@ private:
     // List of classifications for each set
     vector<int> trainingClass;
     vector<int> testingClass;
+    
     
     // Initialize all parameters
     void initConfig(void) {
@@ -344,6 +480,8 @@ private:
         splitDir = "";
         trainingSetFilename = "";
         testingSetFilename = "";
+        trainingSizes = "";
+        kernelType = "";
         
         // Outputs
         outputExtractionFilename = "";
@@ -354,8 +492,11 @@ private:
         
         // Parameters
         bitsize = 8;
+        gamma = .25;
+        degree = 2;
     }
     
+    // Loads the training/testing image names indicated in the config file
     void loadSets(void) {
         string currentName;
         size_t location;
@@ -385,6 +526,8 @@ private:
         
     }
     
+    
+    // Loads training features and labels into a Mat object
     void loadTraining(cv::Mat& outputFeatures, cv::Mat& outputLabels, int filtersize) {
         
             // Allocate storage for the output features (rows = number of samples, columns = size of histogram)
@@ -421,6 +564,8 @@ private:
             
         }
     
+    
+    // Loads testing features and labels into a Mat object
     void loadTesting(cv::Mat& outputFeatures, cv::Mat& outputLabels, int filtersize) {
         
         // Allocate storage for the output features (rows = number of samples, columns = size of histogram)
@@ -455,6 +600,19 @@ private:
             outputLabels.at<int>(j, 0) = testingClass[j];
         }
         
+    }
+    
+    std::string generateFilename(int size) {
+        // Initialize new filename stringstream
+        std::stringstream newFilename;
+        
+        if (kernelType == "POLY") {
+            newFilename <<  "svm-BSIF-" << size << "-" << kernelType << "-" << "degree" << "-" << degree << ".xml";
+        } else if (kernelType == "GAUSS") {
+            newFilename <<  "svm-BSIF-" << size << "-" << kernelType << "-" << "gamma" << "-" << gamma << ".xml";
+        }
+        
+        return newFilename.str();
     }
 };
 
