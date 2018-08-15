@@ -22,6 +22,7 @@ public:
         mapBool["Extract features"] = &extractFeatures;
         mapBool["Train model"] = &trainModel;
         mapBool["Test images"] = &testImages;
+        mapBool["Majority voting"] = &majorityVoting;
         
         mapString["Split directory"] = &splitDir;
         mapString["Training set filename"] = &trainingSetFilename;
@@ -148,9 +149,29 @@ public:
             cout << "- Feature filenames will be in format: " << outputExtractionFilename + "_filter_size_size_bits.csv" << endl;
             cout << "=============" << endl;
         }
-        //if (testImages) {
-        //    cout << "- Testing features will be stored in " << outputHistFilename  + ".csv" << endl;
-        //}
+        
+        if (trainModel) {
+            cout << "=============" << endl;
+            cout << "-Models to be trained: " << endl;
+            for (int i = 0; i < modelSizes.size(); i++) {
+                cout << "   " << generateFilename(i) << endl;
+            }
+            cout << "=============" << endl;
+        }
+        
+        if (testImages) {
+            cout << "=============" << endl;
+            if (majorityVoting) {
+                cout << "- Majority voting will be used to determine result from multiple models" << endl;
+            } else {
+                cout << "- Each model will be tested separately" << endl;
+            }
+            cout << "-Models to be tested: " << endl;
+            for (int i = 0; i < modelSizes.size(); i++) {
+                cout << "   " << generateFilename(i) << endl;
+            }
+            cout << "=============" << endl;
+        }
     }
     
     void run(void) {
@@ -175,11 +196,14 @@ public:
         
         
         if (trainModel) {
-            std::cout << "Training SVM..." << std::endl;
+            std::cout << "Training SVM..." << endl << endl;
           
             // Loop through modelSizes vector to train required models
             for (int i = 0; i < modelSizes.size(); i++) {
-                std::cout << "BSIF size " << modelSizes[i] << "..." << endl;
+                std::cout << "Training model " << (i + 1) << " out of " << modelSizes.size() << "..." << endl;
+                std::cout << "  BSIF size " << modelSizes[i] << endl;
+                std::cout << "  Model type " << kernelType << endl;
+                std::cout << "  Model parameter " << modelParameter[i] << endl;
                 
                 // Load training data for current size
                 cv::Mat featuresTrain;
@@ -218,7 +242,7 @@ public:
         }
         
         if (testImages) {
-            std::cout << "Testing images..." << std::endl;
+            std::cout << "Testing images..." << endl << endl;
             
             // Need to load all models into vector
             std::vector<Ptr<SVM>> testingModels;
@@ -241,67 +265,101 @@ public:
                 }
             }
             
-            // Test performance (majority voting)
-            // Mat objects for testing data
-            cv::Mat featuresTest;
-            cv::Mat classesTest;
-            
-            // Results vector
-            vector<cv::Mat> results;
-            
-            for (int i = 0; i < testingModels.size(); i++) {
-                // Load testing features
-                loadTesting(featuresTest, classesTest, modelSizes[i]);
+            if (majorityVoting) {
+                // Test performance (majority voting)
+                // Mat objects for testing data
+                cv::Mat featuresTest;
+                cv::Mat classesTest;
                 
-                // New Mat for results
-                cv::Mat individualResults(classesTest.rows, classesTest.cols, CV_32FC1);
+                // Results vector
+                vector<cv::Mat> results;
                 
-                // Predict using model
-                testingModels[i]->predict(featuresTest, individualResults);
+                for (int i = 0; i < testingModels.size(); i++) {
+                    // Load testing features
+                    loadTesting(featuresTest, classesTest, modelSizes[i]);
+                    
+                    // New Mat for results
+                    cv::Mat individualResults(classesTest.rows, classesTest.cols, CV_32FC1);
+                    
+                    // Predict using model
+                    testingModels[i]->predict(featuresTest, individualResults);
+                    
+                    // Add results to results vector
+                    results.push_back(individualResults);
+                }
                 
-                // Add results to results vector
-                results.push_back(individualResults);
-            }
-            
-            
-            // Perform majority voting
-            vector<int> overallResult;
-            
-            int numIncorrect = 0;
-            
-            for (int i = 0; i < testingClass.size(); i++) {
-                // Variables to count number of votes for or against
-                int textured = 0;
-                int other = 0;
                 
-                // Loop through results vector
-                for (int j = 0; j < results.size(); j++) {
-                    if (results[j].at<float>(i,0) == 1) {
-                        textured++;
+                // Perform majority voting
+                vector<int> overallResult;
+                
+                int numIncorrect = 0;
+                
+                for (int i = 0; i < testingClass.size(); i++) {
+                    // Variables to count number of votes for or against
+                    int textured = 0;
+                    int other = 0;
+                    
+                    // Loop through results vector
+                    for (int j = 0; j < results.size(); j++) {
+                        if (results[j].at<float>(i,0) == 1) {
+                            textured++;
+                        } else {
+                            other++;
+                        }
+                    }
+                    
+                    // Determine result by majority voting
+                    if (textured > other) {
+                        overallResult.push_back(1);
                     } else {
-                        other++;
+                        overallResult.push_back(0);
+                    }
+                    
+                    // Determine if incorrect
+                    if (overallResult[i] != testingClass[i]) {
+                        numIncorrect++;
                     }
                 }
                 
-                // Determine result by majority voting
-                if (textured > 0) {
-                    overallResult.push_back(1);
-                } else {
-                    overallResult.push_back(0);
-                }
+                // Output accuracy
+                cout << "The total number incorrect is: " << numIncorrect << endl;
                 
-                // Determine if incorrect
-                if (overallResult[i] != testingClass[i]) {
-                    numIncorrect++;
+                float ccr = 100 - ((float)numIncorrect / testingClass.size()) * 100;
+                cout << "CCR: " << ccr << endl;
+            } else {
+                // Use each model separately
+                // Mat objects for testing data
+                cv::Mat featuresTest;
+                cv::Mat classesTest;
+                
+                for (int i = 0; i < testingModels.size(); i++) {
+                    // Load testing features
+                    loadTesting(featuresTest, classesTest, modelSizes[i]);
+                    
+                    // New Mat for results
+                    cv::Mat individualResults(classesTest.rows, classesTest.cols, CV_32FC1);
+                    
+                    // Predict using model
+                    testingModels[i]->predict(featuresTest, individualResults);
+                    
+                    // Determine number incorrect
+                    int numIncorrect = 0;
+                    
+                    for (int j = 0; j < testingClass.size(); j++) {
+                        if (individualResults.at<float>(j,0) != testingClass[j]) {
+                            numIncorrect++;
+                        }
+                    }
+                    
+                    // Output accuracy
+                    cout << "Model: " << generateFilename(i) << endl;
+                    cout << "The total number incorrect is: " << numIncorrect << endl;
+                    
+                    float ccr = 100 - ((float)numIncorrect / testingClass.size()) * 100;
+                    cout << "CCR: " << ccr << endl << endl;
+                    
                 }
             }
-            
-            // Output accuracy
-            cout << "The total number incorrect is: " << numIncorrect << endl;
-            
-            float ccr = 100 - ((float)numIncorrect / testingClass.size()) * 100;
-            cout << "CCR: " << ccr << endl;
-            
          }
     }
     
@@ -311,6 +369,7 @@ private:
     bool extractFeatures;
     bool trainModel;
     bool testImages;
+    bool majorityVoting;
     
     
     // Inputs
@@ -354,6 +413,7 @@ private:
         extractFeatures = false;
         trainModel = false;
         testImages = false;
+        majorityVoting = false;
         
         // Inputs
         databaseImageDir = "";
