@@ -286,7 +286,6 @@ public:
                     results.push_back(individualResults);
                 }
                 
-                
                 // Perform majority voting
                 vector<int> overallResult;
                 
@@ -309,8 +308,10 @@ public:
                     // Determine result by majority voting
                     if (textured > other) {
                         overallResult.push_back(1);
-                    } else {
+                    } else if (other > textured){
                         overallResult.push_back(0);
+                    } else {
+                        overallResult.push_back(1);
                     }
                     
                     // Determine if incorrect
@@ -481,13 +482,23 @@ private:
                     for (int j = 1; j < (*featureCSV).size(); j++) {
                         outputFeatures.at<float>(i, (j-1)) = stoi((*featureCSV)[j]);
                     }
+                    // Normalize
+                    cv::Scalar mean;
+                    cv::Scalar stddev;
+                    
+                    meanStdDev(outputFeatures.row(i), mean, stddev);
+                    
+                    for (int j = 1; j < (*featureCSV).size(); j++) {
+                        outputFeatures.at<float>(i, (j-1)) = (outputFeatures.at<float>(i, (j-1)) - mean[0]) / stddev[0];
+                    }
+                    
                     // Increment the output features counter
                     i++;
                 }
                 // Increment the CSV line
                 featureCSV++;
             }
-            
+        
             // Load classifications
             outputLabels.create((int)trainingClass.size(), 1, CV_32SC1);
             
@@ -519,9 +530,20 @@ private:
                 for (int j = 1; j < (*featureCSV).size(); j++) {
                     outputFeatures.at<float>(i, (j-1)) = stoi((*featureCSV)[j]);
                 }
+                // Normalize
+                cv::Scalar mean;
+                cv::Scalar stddev;
+                
+                meanStdDev(outputFeatures.row(i), mean, stddev);
+                
+                for (int j = 1; j < (*featureCSV).size(); j++) {
+                    outputFeatures.at<float>(i, (j-1)) = (outputFeatures.at<float>(i, (j-1)) - mean[0]) / stddev[0];
+                }
+                
                 // Increment the output features counter
                 i++;
             }
+            
             // Increment the CSV line
             featureCSV++;
         }
