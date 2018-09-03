@@ -12,6 +12,7 @@
 		B2A168E920F669A20021139E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A168E820F669A20021139E /* main.cpp */; };
 		B2A168F420F669C50021139E /* filtermap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A168EF20F669C40021139E /* filtermap.cpp */; };
 		B2A168F520F669C50021139E /* CSVIterator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A168F220F669C50021139E /* CSVIterator.cpp */; };
+		B2CB1922213CC66900B40ADC /* makefile in Sources */ = {isa = PBXBuildFile; fileRef = B2CB1921213CC66800B40ADC /* makefile */; };
 		B2D4BECD20F66E0C00BF4257 /* BSIFFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2D4BECB20F66E0C00BF4257 /* BSIFFilter.cpp */; };
 /* End PBXBuildFile section */
 
@@ -40,6 +41,7 @@
 		B2A168F120F669C40021139E /* filters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = filters.h; sourceTree = "<group>"; };
 		B2A168F220F669C50021139E /* CSVIterator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CSVIterator.cpp; sourceTree = "<group>"; };
 		B2A168F320F669C50021139E /* CSVIterator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CSVIterator.hpp; sourceTree = "<group>"; };
+		B2CB1921213CC66800B40ADC /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = makefile; path = TCLDetection/makefile; sourceTree = "<group>"; };
 		B2D4BECB20F66E0C00BF4257 /* BSIFFilter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BSIFFilter.cpp; sourceTree = "<group>"; };
 		B2D4BECC20F66E0C00BF4257 /* BSIFFilter.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BSIFFilter.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -58,6 +60,7 @@
 		B2A168DC20F669A10021139E = {
 			isa = PBXGroup;
 			children = (
+				B2CB1921213CC66800B40ADC /* makefile */,
 				B238CC132124D2D7002E70A4 /* configuration.ini */,
 				B2A168E720F669A20021139E /* TCLDetection */,
 				B2A168E620F669A20021139E /* Products */,
@@ -148,6 +151,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B2A168F420F669C50021139E /* filtermap.cpp in Sources */,
+				B2CB1922213CC66900B40ADC /* makefile in Sources */,
 				B2363900210BBCF30050597B /* featureExtractor.cpp in Sources */,
 				B27A52E320FE8F0B005F8D93 /* TCLManager.cpp in Sources */,
 				B2D4BECD20F66E0C00BF4257 /* BSIFFilter.cpp in Sources */,

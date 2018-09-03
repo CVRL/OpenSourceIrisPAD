@@ -27,6 +27,7 @@ public:
         mapString["Split directory"] = &splitDir;
         mapString["Training set filename"] = &trainingSetFilename;
         mapString["Testing set filename"] = &testingSetFilename;
+        mapString["Validation set filename"] = &validationSetFilename;
         mapString["Database image directory"] = &databaseImageDir;
         mapString["Training sizes"] = &trainingSizes;
         mapString["Kernel type"] = &kernelType;
@@ -243,7 +244,7 @@ public:
             std::cout << "Testing images..." << endl << endl;
             
             // Need to load all models into vector
-            std::vector<Ptr<SVM>> testingModels;
+            std::vector< Ptr<SVM> > testingModels;
             
             // Loop through modelSize vector
             for (int i = 0; i < modelSizes.size(); i++) {
@@ -264,6 +265,42 @@ public:
             }
             
             if (majorityVoting) {
+                // Test on validation set, use to weight majority voting
+                cv::Mat featuresValidation;
+                cv::Mat classesValidation;
+                
+                // Track accuracies in vector
+                vector<float> modelAccuracies;
+                
+                for (int i = 0; i < testingModels.size(); i++) {
+                    // Load validation features; don't really need validation classes here
+                    loadValidation(featuresValidation, classesValidation, modelSizes[i]);
+                    
+                    // New Mat for results
+                    cv::Mat individualResults(classesValidation.rows, classesValidation.cols, CV_32FC1);
+                    
+                    // Predict using model
+                    testingModels[i]->predict(featuresValidation, individualResults);
+                    
+                    // Determine number incorrect
+                    int numIncorrect = 0;
+                    
+                    for (int j = 0; j < validationClass.size(); j++) {
+                        if (individualResults.at<float>(j,0) != validationClass[j]) {
+                            numIncorrect++;
+                        }
+                    }
+                    
+                    // Output accuracy
+                    cout << "Model: " << generateFilename(i) << endl;
+                    cout << "The total number incorrect is: " << numIncorrect << endl;
+                    
+                    float ccr = 100 - ((float)numIncorrect / validationClass.size()) * 100;
+                    cout << "CCR: " << ccr << endl << endl;
+                    modelAccuracies.push_back(ccr);
+                    
+                }
+                
                 // Test performance (majority voting)
                 // Mat objects for testing data
                 cv::Mat featuresTest;
@@ -292,26 +329,19 @@ public:
                 int numIncorrect = 0;
                 
                 for (int i = 0; i < testingClass.size(); i++) {
-                    // Variables to count number of votes for or against
-                    int textured = 0;
-                    int other = 0;
+                    // Variables for majority voting division
+                    float numerator = 0;
+                    float denominator = 0;
                     
-                    // Loop through results vector
-                    for (int j = 0; j < results.size(); j++) {
-                        if (results[j].at<float>(i,0) == 1) {
-                            textured++;
-                        } else {
-                            other++;
-                        }
+                    for (int j = 0; j < testingModels.size(); j++) {
+                        numerator += results[j].at<float>(i,0) * modelAccuracies[j];
+                        denominator += modelAccuracies[j];
                     }
                     
-                    // Determine result by majority voting
-                    if (textured > other) {
+                    if ((numerator/denominator) > 0.5) {
                         overallResult.push_back(1);
-                    } else if (other > textured){
-                        overallResult.push_back(0);
                     } else {
-                        overallResult.push_back(1);
+                        overallResult.push_back(0);
                     }
                     
                     // Determine if incorrect
@@ -376,11 +406,13 @@ private:
     std::string splitDir;
     std::string trainingSetFilename;
     std::string testingSetFilename;
+    std::string validationSetFilename;
     std::string trainingSizes;
     std::vector<int> modelSizes;
     std::string kernelType;
     std::string parameterString;
     std::vector<double> modelParameter;
+    
     
     // Outputs
     std::string outputExtractionFilename;
@@ -398,10 +430,12 @@ private:
     // List of filenames for each set
     vector<string> trainingSet;
     vector<string> testingSet;
+    vector<string> validationSet;
     
     // List of classifications for each set
     vector<int> trainingClass;
     vector<int> testingClass;
+    vector<int> validationClass;
     
     
     // Initialize all parameters
@@ -417,6 +451,7 @@ private:
         splitDir = "";
         trainingSetFilename = "";
         testingSetFilename = "";
+        validationSetFilename = "";
         trainingSizes = "";
         kernelType = "";
         parameterString = "";
@@ -457,6 +492,18 @@ private:
             testingClass.push_back(stoi(currentName.substr((location + 1))));
         }
         test.close();
+        
+        // Validation sets
+        ifstream verify;
+        verify.open(splitDir + validationSetFilename);
+        currentName = "";
+        
+        while (getline(verify, currentName)) {
+            location = currentName.find(",");
+            validationSet.push_back(currentName.substr(0, location));
+            validationClass.push_back(stoi(currentName.substr((location + 1))));
+        }
+        verify.close();
         
     }
     
@@ -557,6 +604,53 @@ private:
         
     }
     
+    // Loads testing features and labels into a Mat object
+    void loadValidation(cv::Mat& outputFeatures, cv::Mat& outputLabels, int filtersize) {
+        
+        // Allocate storage for the output features (rows = number of samples, columns = size of histogram)
+        outputFeatures.create((int)validationSet.size(), pow(2,bitsize), CV_32FC1);
+        
+        // Load features
+        stringstream featureFilename;
+        featureFilename << outputExtractionDir << outputExtractionFilename << "_filter_" << filtersize << "_" << filtersize << "_" << bitsize << ".csv";
+        ifstream featureFile(featureFilename.str());
+        CSVIterator featureCSV(featureFile);
+        
+        int i = 0;
+        
+        while (featureCSV != CSVIterator()) {
+            // If the current line includes a file from the testing set
+            if (find(validationSet.begin(), validationSet.end(),(*featureCSV)[0]) != validationSet.end()) {
+                // Start at 1 to ignore filename column
+                for (int j = 1; j < (*featureCSV).size(); j++) {
+                    outputFeatures.at<float>(i, (j-1)) = stoi((*featureCSV)[j]);
+                }
+                // Normalize
+                cv::Scalar mean;
+                cv::Scalar stddev;
+                
+                meanStdDev(outputFeatures.row(i), mean, stddev);
+                
+                for (int j = 1; j < (*featureCSV).size(); j++) {
+                    outputFeatures.at<float>(i, (j-1)) = (outputFeatures.at<float>(i, (j-1)) - mean[0]) / stddev[0];
+                }
+                
+                // Increment the output features counter
+                i++;
+            }
+            
+            // Increment the CSV line
+            featureCSV++;
+        }
+        
+        // Load classifications
+        outputLabels.create((int)validationClass.size(), 1, CV_32SC1);
+        
+        for (int j = 0; j < validationClass.size(); j++) {
+            outputLabels.at<int>(j, 0) = validationClass[j];
+        }
+        
+    }
     std::string generateFilename(int i) {
         // Initialize new filename stringstream
         std::stringstream newFilename;
