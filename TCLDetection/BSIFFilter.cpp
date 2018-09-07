@@ -35,13 +35,6 @@ void BSIFFilter::loadFilter(int dimension, int bitlength) {
 
 void BSIFFilter::generateImage(cv::Mat src, cv::Mat& dst) {
     //initializing matrix of 1s
-    /*double codeImg[src.rows][src.cols];
-    for (int i = 0; i < src.rows; i++){
-        for (int j = 0; j < src.cols; j++){
-            codeImg[i][j] = 1;
-        }
-    }*/
-    
     cv::Mat codeImg = cv::Mat::ones(src.rows, src.cols, CV_64FC1);
     
     
@@ -93,13 +86,6 @@ void BSIFFilter::generateImage(cv::Mat src, cv::Mat& dst) {
 
 void BSIFFilter::generateHistogram(cv::Mat src, std::vector<int>& histogram) {
     //initializing matrix of 1s
-    /*double codeImg[src.rows][src.cols];
-    for (int i = 0; i < src.rows; i++){
-        for (int j = 0; j < src.cols; j++){
-            codeImg[i][j] = 1;
-        }
-    }*/
-    
     cv::Mat codeImg = cv::Mat::ones(src.rows, src.cols, CV_64FC1);
     
     // creates the border around the image - it is wrapping
