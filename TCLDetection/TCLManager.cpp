@@ -62,7 +62,7 @@ void TCLManager::loadConfig(const std::string& Filename) {
         // Filter out comments
         if ( ! line.empty() )
         {
-            int pos = (int)line.find('#') ;
+            unsigned long pos = line.find('#') ;
             if ( pos != string::npos )
                 line = line.substr(0,pos) ;
         }
@@ -70,7 +70,7 @@ void TCLManager::loadConfig(const std::string& Filename) {
         // Split line into key and value
         if ( ! line.empty() )
         {
-            int pos = (int)line.find("=") ;
+            unsigned long pos = (int)line.find("=") ;
             
             if ( pos != string::npos )
             {
@@ -149,7 +149,7 @@ void TCLManager::showConfig(void) {
         cout << "=============" << endl;
         cout << "- The training set will be: " << splitDir << trainingSetFilename << endl;
         cout << "- Models to be trained: " << endl;
-        for (int i = 0; i < modelSizes.size(); i++) {
+        for (int i = 0; i < (int)modelSizes.size(); i++) {
             cout << "   " << generateFilename(i) << endl;
         }
         cout << "=============" << endl;
@@ -166,7 +166,7 @@ void TCLManager::showConfig(void) {
         }
         cout << "- The testing set will be: " << splitDir << testingSetFilename << endl;
         cout << "- Models to be tested: " << endl;
-        for (int i = 0; i < modelSizes.size(); i++) {
+        for (int i = 0; i < (int)modelSizes.size(); i++) {
             cout << "   " << generateFilename(i) << endl;
         }
         cout << "=============" << endl;
@@ -204,7 +204,7 @@ void TCLManager::run(void) {
         std::cout << "Training SVM..." << endl << endl;
         
         // Loop through modelSizes vector to train required models
-        for (int i = 0; i < modelSizes.size(); i++) {
+        for (int i = 0; i < (int)modelSizes.size(); i++) {
             std::cout << "Training model " << (i + 1) << " out of " << modelSizes.size() << "..." << endl;
             std::cout << "  BSIF size " << modelSizes[i] << endl;
             std::cout << "  Model type " << kernelType << endl;
@@ -255,7 +255,7 @@ void TCLManager::run(void) {
         std::vector< Ptr<SVM> > testingModels;
         
         // Loop through modelSize vector
-        for (int i = 0; i < modelSizes.size(); i++) {
+        for (int i = 0; i < (int)modelSizes.size(); i++) {
             // Check if file exists
             ifstream nextFile(modelOutputDir + generateFilename(i));
             
@@ -280,7 +280,7 @@ void TCLManager::run(void) {
             // Track accuracies in vector
             vector<float> modelAccuracies;
             
-            for (int i = 0; i < testingModels.size(); i++) {
+            for (int i = 0; i < (int)testingModels.size(); i++) {
                 // Load validation features; don't really need validation classes here
                 loadFeatures(featuresValidation, classesValidation, modelSizes[i], VALID);
                 
@@ -293,7 +293,7 @@ void TCLManager::run(void) {
                 // Determine number incorrect
                 int numIncorrect = 0;
                 
-                for (int j = 0; j < validationClass.size(); j++) {
+                for (int j = 0; j < (int)validationClass.size(); j++) {
                     if (individualResults.at<float>(j,0) != validationClass[j]) {
                         numIncorrect++;
                     }
@@ -317,7 +317,7 @@ void TCLManager::run(void) {
             // Results vector
             vector<cv::Mat> results;
             
-            for (int i = 0; i < testingModels.size(); i++) {
+            for (int i = 0; i < (int)testingModels.size(); i++) {
                 // Load testing features
                 loadFeatures(featuresTest, classesTest, modelSizes[i], TEST);
                 
@@ -336,12 +336,12 @@ void TCLManager::run(void) {
             
             int numIncorrect = 0;
             
-            for (int i = 0; i < testingClass.size(); i++) {
+            for (int i = 0; i < (int)testingClass.size(); i++) {
                 // Variables for majority voting division
                 float numerator = 0;
                 float denominator = 0;
                 
-                for (int j = 0; j < testingModels.size(); j++) {
+                for (int j = 0; j < (int)testingModels.size(); j++) {
                     numerator += results[j].at<float>(i,0) * modelAccuracies[j];
                     denominator += modelAccuracies[j];
                 }
@@ -369,7 +369,7 @@ void TCLManager::run(void) {
             cv::Mat featuresTest;
             cv::Mat classesTest;
             
-            for (int i = 0; i < testingModels.size(); i++) {
+            for (int i = 0; i < (int)testingModels.size(); i++) {
                 // Load testing features
                 loadFeatures(featuresTest, classesTest, modelSizes[i], TEST);
                 
@@ -382,7 +382,7 @@ void TCLManager::run(void) {
                 // Determine number incorrect
                 int numIncorrect = 0;
                 
-                for (int j = 0; j < testingClass.size(); j++) {
+                for (int j = 0; j < (int)testingClass.size(); j++) {
                     if (individualResults.at<float>(j,0) != testingClass[j]) {
                         numIncorrect++;
                     }
@@ -513,7 +513,7 @@ void TCLManager::loadFeatures(cv::Mat& outputFeatures, cv::Mat& outputLabels, in
         // If the current line includes a file from the testing set
         if (find((*fileSet).begin(), (*fileSet).end(),(*featureCSV)[0]) != (*fileSet).end()) {
             // Start at 1 to ignore filename column
-            for (int j = 1; j < (*featureCSV).size(); j++) {
+            for (int j = 1; j < (int)(*featureCSV).size(); j++) {
                 outputFeatures.at<float>(i, (j-1)) = stoi((*featureCSV)[j]);
             }
             // Normalize
@@ -522,7 +522,7 @@ void TCLManager::loadFeatures(cv::Mat& outputFeatures, cv::Mat& outputLabels, in
             
             meanStdDev(outputFeatures.row(i), mean, stddev);
             
-            for (int j = 1; j < (*featureCSV).size(); j++) {
+            for (int j = 1; j < (int)(*featureCSV).size(); j++) {
                 outputFeatures.at<float>(i, (j-1)) = (outputFeatures.at<float>(i, (j-1)) - mean[0]) / stddev[0];
             }
             
@@ -537,7 +537,7 @@ void TCLManager::loadFeatures(cv::Mat& outputFeatures, cv::Mat& outputLabels, in
     // Load classifications
     outputLabels.create((int)(*classSet).size(), 1, CV_32SC1);
     
-    for (int j = 0; j < (*classSet).size(); j++) {
+    for (int j = 0; j < (int)(*classSet).size(); j++) {
         outputLabels.at<int>(j, 0) = (*classSet)[j];
     }
     

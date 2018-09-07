@@ -54,7 +54,7 @@ void featureExtractor::filter(int filterSize) {
     std::vector<int> histogram(histsize, 0);
     
     // Loop through images
-    for (int i = 0; i < filenames.size(); i++) {
+    for (int i = 0; i < (int)filenames.size(); i++) {
         // Display progress
         std::cout << "Processing sample " << (i + 1) << " out of " << filenames.size() << endl;
         cout << filenames[i] << endl;

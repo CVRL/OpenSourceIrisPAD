@@ -12,8 +12,9 @@ using namespace std;
 
 
 int main(int argc, char *argv[]) {
-  
-    
+    if (argc != 2) {
+        cout << "Error: Please enter correct arguments." << endl;
+    }
     
     // Load TCLManager
     TCLManager tcl;
