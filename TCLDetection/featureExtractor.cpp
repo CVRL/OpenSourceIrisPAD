@@ -12,32 +12,112 @@ using namespace std;
 
 featureExtractor::featureExtractor(int bits, vector<string>& inFilenames) : bitsize(bits), filenames(inFilenames){}
     
-void featureExtractor::extract(std::string& outDir, std::string& outName, std::string& imageDir) {
+void featureExtractor::extract(std::string& outDir, std::string& outName, std::string& imageDir)
+{
+    
     outputLocation = outDir + outName;
     imageLocation = imageDir;
     
     // Filter with 8 different sizes
     cout << "Filtering with size 3..." << endl;
-    filter(3);
+    try
+    {
+        filter(3);
+    }
+    catch (exception& e)
+    {
+        throw e;
+    }
+    
+    
     cout << "Filtering with size 5..." << endl;
-    filter(5);
+    try
+    {
+        filter(5);
+    }
+    catch (exception& e)
+    {
+        throw e;
+    }
+    
+    
     cout << "Filtering with size 7..." << endl;
-    filter(7);
+    try
+    {
+        filter(7);
+    }
+    catch (exception& e)
+    {
+        throw e;
+    }
+    
+    
     cout << "Filtering with size 9..." << endl;
-    filter(9);
+    try
+    {
+        filter(9);
+    }
+    catch (exception& e)
+    {
+        throw e;
+    }
+    
+    
     cout << "Filtering with size 11..." << endl;
-    filter(11);
+    try
+    {
+        filter(11);
+    }
+    catch (exception& e)
+    {
+        throw e;
+    }
+    
+    
     cout << "Filtering with size 13..." << endl;
-    filter(13);
+    try
+    {
+        filter(13);
+    }
+    catch (exception& e)
+    {
+        throw e;
+    }
+    
+    
     cout << "Filtering with size 15..." << endl;
-    filter(15);
+    try
+    {
+        filter(15);
+    }
+    catch (exception& e)
+    {
+        throw e;
+    }
+    
+    
     cout << "Filtering with size 17..." << endl;
-    filter(17);
+    try
+    {
+        filter(17);
+    }
+    catch (exception& e)
+    {
+        throw e;
+    }
+    
+    
     cout << "Done generating features." << endl;
 }
-    
+
+
+
+
+
 // Function produces features for filter size and its double (through downsampling)
-void featureExtractor::filter(int filterSize) {
+void featureExtractor::filter(int filterSize)
+{
+    
     // Load filter
     BSIFFilter currentFilter;
     currentFilter.loadFilter(filterSize, bitsize);
@@ -54,12 +134,18 @@ void featureExtractor::filter(int filterSize) {
     std::vector<int> histogram(histsize, 0);
     
     // Loop through images
-    for (int i = 0; i < (int)filenames.size(); i++) {
+    for (int i = 0; i < (int)filenames.size(); i++)
+    {
         // Display progress
         std::cout << "Processing sample " << (i + 1) << " out of " << filenames.size() << endl;
         cout << filenames[i] << endl;
+        
         // Load image from file
         cv::Mat image = cv::imread((imageLocation + filenames[i]), 0);
+        if ( image.empty() )
+        {
+            throw runtime_error("Error: unable to read image " + filenames[i] + " for feature extraction.");
+        }
         
         // Save image information
         histOut << filenames[i] << ",";

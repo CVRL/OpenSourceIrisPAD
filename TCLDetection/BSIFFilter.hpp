@@ -18,7 +18,8 @@
 #include <iostream>
 
 
-class BSIFFilter {
+class BSIFFilter
+{
 public:
     BSIFFilter();
     

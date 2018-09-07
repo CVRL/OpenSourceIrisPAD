@@ -13,22 +13,29 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
     
-    if (argc != 2) {
+    if (argc != 2)
+    {
         cout << "Error: Please enter correct arguments." << endl;
+        return 0;
     }
     
     // Load TCLManager
     TCLManager tcl;
     
     
-    // Pass configuration file
+    // Load configuration
     tcl.loadConfig(argv[1]);
     // Show configuration
     tcl.showConfig();
     
-    
-    tcl.run();
-    
+    try
+    {
+        tcl.run();
+    }
+    catch (exception& e)
+    {
+        cout << e.what() << endl;
+    }
     
     return 0;
     

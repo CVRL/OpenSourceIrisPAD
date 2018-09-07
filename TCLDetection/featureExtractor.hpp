@@ -14,7 +14,8 @@
 #include "BSIFFilter.hpp"
 
 
-class featureExtractor {
+class featureExtractor
+{
 public:
     featureExtractor(int bits, std::vector<std::string>& inFilenames);
     

@@ -16,7 +16,8 @@
 #define VALID 1
 #define TEST 2
 
-class TCLManager {
+class TCLManager
+{
 public:
     TCLManager(void);
     

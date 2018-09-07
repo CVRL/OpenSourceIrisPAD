@@ -12,8 +12,10 @@ using namespace std;
 using namespace cv;
 using namespace cv::ml;
 
-
-TCLManager::TCLManager(void) {
+// Default constructor
+TCLManager::TCLManager(void)
+{
+    
     // Associate lines of config file to attributes
     mapBool["Extract features"] = &extractFeatures;
     mapBool["Train model"] = &trainModel;
@@ -39,15 +41,23 @@ TCLManager::TCLManager(void) {
     
     // Initialize
     initConfig();
+    
 }
 
-void TCLManager::loadConfig(const std::string& Filename) {
+
+
+
+
+// Load configuration from config file
+void TCLManager::loadConfig(const std::string& Filename)
+{
+    
     // Open the file
     std::ifstream configFile(Filename, std::ifstream::in);
     
     if ( ! configFile.good() )
-        std::cout << "Error: Cannot read configuration file." << std::endl;
-    //throw runtime_error("Cannot read configuration file " + rFilename ) ;
+        
+        throw runtime_error("Error: Cannot read configuration file " + Filename ) ;
     
     // String utilities
     tclStringUtil tsu;
@@ -94,7 +104,7 @@ void TCLManager::loadConfig(const std::string& Filename) {
                     
                     // Option is not stored in any mMap
                     else
-                        cout << "Unknown option in configuration file : " << line << endl ;
+                        throw runtime_error("Error: Unknown option " + line + " in configuration file");
                 }
             }
         }
@@ -105,20 +115,29 @@ void TCLManager::loadConfig(const std::string& Filename) {
     
     std::string currentNum;
     
-    while (getline(modelStream, currentNum, ',')) {
+    while (getline(modelStream, currentNum, ','))
+    {
         modelSizes.push_back(stoi(currentNum));
     }
     
     // Determine model parameters from parameterString
     std::stringstream parameterStream(parameterString);
     
-    while (getline(parameterStream, currentNum, ',')) {
+    while (getline(parameterStream, currentNum, ','))
+    {
         modelParameter.push_back(stod(currentNum));
     }
     
 }
 
-void TCLManager::showConfig(void) {
+
+
+
+
+// Display the configuration to the user
+void TCLManager::showConfig(void)
+{
+    
     cout << "=============" << endl ;
     cout << "Configuration" << endl ;
     cout << "=============" << endl ;
@@ -126,64 +145,97 @@ void TCLManager::showConfig(void) {
     
     
     cout << "- Process : " ;
-    if (extractFeatures) {
+    if (extractFeatures)
+    {
         cout << "| Extract features | ";
     }
-    if (trainModel) {
+    if (trainModel)
+    {
         cout << "| Train model | ";
     }
-    if (testImages) {
+    if (testImages)
+    {
         cout << "| Test images | ";
     }
     cout << endl;
     
     
-    if (extractFeatures) {
+    if (extractFeatures)
+    {
         cout << "=============" << endl;
         cout << "- Features will be stored in directory: " << outputExtractionDir << endl;
         cout << "- Feature filenames will be in format: " << outputExtractionFilename + "_filter_size_size_bits.csv" << endl;
         cout << "=============" << endl;
     }
     
-    if (trainModel) {
+    if (trainModel)
+    {
         cout << "=============" << endl;
         cout << "- The training set will be: " << splitDir << trainingSetFilename << endl;
         cout << "- Models to be trained: " << endl;
-        for (int i = 0; i < (int)modelSizes.size(); i++) {
+        for (int i = 0; i < (int)modelSizes.size(); i++)
+        {
             cout << "   " << generateFilename(i) << endl;
         }
         cout << "=============" << endl;
     }
     
-    if (testImages) {
+    if (testImages)
+    {
         cout << "=============" << endl;
-        if (majorityVoting) {
+        if (majorityVoting)
+        {
             cout << "- Majority voting will be used to determine result from multiple models" << endl;
             cout << "- The validation set will be used to weight each model" << endl;
             cout << "- The validation set will be: " << splitDir << validationSetFilename << endl;
-        } else {
+        } else
+        {
             cout << "- Models will be tested separately" << endl;
         }
         cout << "- The testing set will be: " << splitDir << testingSetFilename << endl;
         cout << "- Models to be tested: " << endl;
-        for (int i = 0; i < (int)modelSizes.size(); i++) {
+        for (int i = 0; i < (int)modelSizes.size(); i++)
+        {
             cout << "   " << generateFilename(i) << endl;
         }
         cout << "=============" << endl;
     }
+    
 }
 
-void TCLManager::run(void) {
+
+
+
+
+// Perform functions according to settings in config file
+void TCLManager::run(void)
+{
+    
     cout << endl ;
     cout << "================" << endl ;
     cout << "Start processing" << endl ;
     cout << "================" << endl ;
     cout << endl ;
     
+    try
+    {
     loadSets();
+    }
+    catch (exception& e)
+    {
+        throw e;
+    }
     
-    if (extractFeatures) {
+    if (extractFeatures)
+    {
+        
         std::cout << "Extracting features..." << std::endl;
+        
+        // Verify bitsize (program has only been tested with bitsize 8 as of now)
+        if (bitsize != 8)
+        {
+            throw runtime_error("Error: Please use bitsize 8 for tested results.");
+        }
         
         // Concatenate lists of files
         std::vector<std::string> extractionFilenames;
@@ -195,16 +247,26 @@ void TCLManager::run(void) {
         featureExtractor newExtractor(bitsize, extractionFilenames);
         
         // Extract
-        newExtractor.extract(outputExtractionDir, outputExtractionFilename, imageDir);
+        try
+        {
+            newExtractor.extract(outputExtractionDir, outputExtractionFilename, imageDir);
+        }
+        catch (exception& e)
+        {
+            throw e;
+        }
         
     }
     
     
-    if (trainModel) {
+    if (trainModel)
+    {
+        
         std::cout << "Training SVM..." << endl << endl;
         
         // Loop through modelSizes vector to train required models
-        for (int i = 0; i < (int)modelSizes.size(); i++) {
+        for (int i = 0; i < (int)modelSizes.size(); i++)
+        {
             std::cout << "Training model " << (i + 1) << " out of " << modelSizes.size() << "..." << endl;
             std::cout << "  BSIF size " << modelSizes[i] << endl;
             std::cout << "  Model type " << kernelType << endl;
@@ -214,13 +276,18 @@ void TCLManager::run(void) {
             cv::Mat featuresTrain;
             cv::Mat classesTrain;
             
-            cv::Mat featuresTrain2;
-            cv::Mat classesTrain2;
-            
+            try
+            {
             loadFeatures(featuresTrain, classesTrain, modelSizes[i], TRAIN);
+            }
+            catch (exception& e)
+            {
+                throw e;
+            }
             
             // Create new SVM and train
-            if (kernelType == "POLY") {
+            if (kernelType == "POLY")
+            {
                 Ptr<SVM> svmPoly = SVM::create();
                 
                 // Set parameters
@@ -232,7 +299,9 @@ void TCLManager::run(void) {
                 svmPoly->train(featuresTrain, ROW_SAMPLE, classesTrain);
                 
                 svmPoly->save(modelOutputDir + generateFilename(i));
-            } else if (kernelType == "GAUSS") {
+            }
+            else if (kernelType == "GAUSS")
+            {
                 Ptr<SVM> svmGauss = SVM::create();
                 
                 // Set parameters
@@ -248,31 +317,36 @@ void TCLManager::run(void) {
         }
     }
     
-    if (testImages) {
+    if (testImages)
+    {
         std::cout << "Testing images..." << endl << endl;
         
         // Need to load all models into vector
         std::vector< Ptr<SVM> > testingModels;
         
         // Loop through modelSize vector
-        for (int i = 0; i < (int)modelSizes.size(); i++) {
+        for (int i = 0; i < (int)modelSizes.size(); i++)
+        {
             // Check if file exists
             ifstream nextFile(modelOutputDir + generateFilename(i));
             
-            if (nextFile.good()) {
+            if (nextFile.good())
+            {
                 // Load SVM
                 Ptr<SVM> currentSVM = Algorithm::load<SVM>(modelOutputDir + generateFilename(i));
                 
                 // Add to list of models
                 testingModels.push_back(currentSVM);
                 
-            } else {
-                std::cout << "Model \"" << generateFilename(i) << "\" not found." << endl;
-                std::cout << "Please make sure all models have been trained." << endl;
+            }
+            else
+            {
+                throw runtime_error("Error: Model \"" + generateFilename(i) + "\" not found.");
             }
         }
         
-        if (majorityVoting) {
+        if (majorityVoting)
+        {
             // Test on validation set, use to weight majority voting
             cv::Mat featuresValidation;
             cv::Mat classesValidation;
@@ -280,9 +354,17 @@ void TCLManager::run(void) {
             // Track accuracies in vector
             vector<float> modelAccuracies;
             
-            for (int i = 0; i < (int)testingModels.size(); i++) {
-                // Load validation features; don't really need validation classes here
+            for (int i = 0; i < (int)testingModels.size(); i++)
+            {
+                // Load validation features
+                try
+                {
                 loadFeatures(featuresValidation, classesValidation, modelSizes[i], VALID);
+                }
+                catch (exception& e)
+                {
+                    throw e;
+                }
                 
                 // New Mat for results
                 cv::Mat individualResults(classesValidation.rows, classesValidation.cols, CV_32FC1);
@@ -293,19 +375,22 @@ void TCLManager::run(void) {
                 // Determine number incorrect
                 int numIncorrect = 0;
                 
-                for (int j = 0; j < (int)validationClass.size(); j++) {
-                    if (individualResults.at<float>(j,0) != validationClass[j]) {
+                for (int j = 0; j < (int)validationClass.size(); j++)
+                {
+                    if (individualResults.at<float>(j,0) != validationClass[j])
+                    {
                         numIncorrect++;
                     }
                 }
-                
+                /*
                 // Output accuracy
                 cout << "Model: " << generateFilename(i) << endl;
                 cout << "The total number incorrect is: " << numIncorrect << endl;
-                
+                */
                 float ccr = 100 - ((float)numIncorrect / validationClass.size()) * 100;
-                cout << "CCR: " << ccr << endl << endl;
+                // cout << "CCR: " << ccr << endl << endl;
                 modelAccuracies.push_back(ccr);
+                
                 
             }
             
@@ -317,9 +402,17 @@ void TCLManager::run(void) {
             // Results vector
             vector<cv::Mat> results;
             
-            for (int i = 0; i < (int)testingModels.size(); i++) {
+            for (int i = 0; i < (int)testingModels.size(); i++)
+            {
                 // Load testing features
+                try
+                {
                 loadFeatures(featuresTest, classesTest, modelSizes[i], TEST);
+                }
+                catch (exception& e)
+                {
+                    throw e;
+                }
                 
                 // New Mat for results
                 cv::Mat individualResults(classesTest.rows, classesTest.cols, CV_32FC1);
@@ -336,24 +429,30 @@ void TCLManager::run(void) {
             
             int numIncorrect = 0;
             
-            for (int i = 0; i < (int)testingClass.size(); i++) {
+            for (int i = 0; i < (int)testingClass.size(); i++)
+            {
                 // Variables for majority voting division
                 float numerator = 0;
                 float denominator = 0;
                 
-                for (int j = 0; j < (int)testingModels.size(); j++) {
+                for (int j = 0; j < (int)testingModels.size(); j++)
+                {
                     numerator += results[j].at<float>(i,0) * modelAccuracies[j];
                     denominator += modelAccuracies[j];
                 }
                 
-                if ((numerator/denominator) > 0.5) {
+                if ((numerator/denominator) > 0.5)
+                {
                     overallResult.push_back(1);
-                } else {
+                }
+                else
+                {
                     overallResult.push_back(0);
                 }
                 
                 // Determine if incorrect
-                if (overallResult[i] != testingClass[i]) {
+                if (overallResult[i] != testingClass[i])
+                {
                     numIncorrect++;
                 }
             }
@@ -363,15 +462,25 @@ void TCLManager::run(void) {
             
             float ccr = 100 - ((float)numIncorrect / testingClass.size()) * 100;
             cout << "CCR: " << ccr << endl;
-        } else {
+        }
+        else
+        {
             // Use each model separately
             // Mat objects for testing data
             cv::Mat featuresTest;
             cv::Mat classesTest;
             
-            for (int i = 0; i < (int)testingModels.size(); i++) {
+            for (int i = 0; i < (int)testingModels.size(); i++)
+            {
                 // Load testing features
+                try
+                {
                 loadFeatures(featuresTest, classesTest, modelSizes[i], TEST);
+                }
+                catch (exception& e)
+                {
+                    throw e;
+                }
                 
                 // New Mat for results
                 cv::Mat individualResults(classesTest.rows, classesTest.cols, CV_32FC1);
@@ -382,8 +491,10 @@ void TCLManager::run(void) {
                 // Determine number incorrect
                 int numIncorrect = 0;
                 
-                for (int j = 0; j < (int)testingClass.size(); j++) {
-                    if (individualResults.at<float>(j,0) != testingClass[j]) {
+                for (int j = 0; j < (int)testingClass.size(); j++)
+                {
+                    if (individualResults.at<float>(j,0) != testingClass[j])
+                    {
                         numIncorrect++;
                     }
                 }
@@ -402,8 +513,12 @@ void TCLManager::run(void) {
 
 
 
+
+
 // Initialize all parameters
-void TCLManager::initConfig(void) {
+void TCLManager::initConfig(void)
+{
+    
     // Commands
     extractFeatures = false;
     trainModel = false;
@@ -427,11 +542,16 @@ void TCLManager::initConfig(void) {
     
     // Parameters
     bitsize = 8;
+    
 }
 
-// Loads the training/validation/testing image names indicated in the config file
 
-void TCLManager::loadSets(void) {
+
+
+
+// Loads the training/validation/testing image names indicated in the config file
+void TCLManager::loadSets(void)
+{
     string currentName;
     size_t location;
     
@@ -439,11 +559,18 @@ void TCLManager::loadSets(void) {
     ifstream train;
     train.open(splitDir + trainingSetFilename);
     
-    while (getline(train, currentName)) {
+    if (! train.good())
+    {
+        throw runtime_error("Error: training split not found in " + trainingSetFilename);
+    }
+    
+    while (getline(train, currentName))
+    {
         location = currentName.find(",");
         trainingSet.push_back(currentName.substr(0, location));
         trainingClass.push_back(stoi(currentName.substr((location + 1))));
     }
+    
     train.close();
     
     // Testing sets
@@ -451,7 +578,13 @@ void TCLManager::loadSets(void) {
     test.open(splitDir + testingSetFilename);
     currentName = "";
     
-    while (getline(test, currentName)) {
+    if (! test.good())
+    {
+        throw runtime_error("Error: testing split not found in " + testingSetFilename);
+    }
+    
+    while (getline(test, currentName))
+    {
         location = currentName.find(",");
         testingSet.push_back(currentName.substr(0, location));
         testingClass.push_back(stoi(currentName.substr((location + 1))));
@@ -463,7 +596,13 @@ void TCLManager::loadSets(void) {
     verify.open(splitDir + validationSetFilename);
     currentName = "";
     
-    while (getline(verify, currentName)) {
+    if (! verify.good())
+    {
+        throw runtime_error("Error: validation split not found in " + validationSetFilename);
+    }
+    
+    while (getline(verify, currentName))
+    {
         location = currentName.find(",");
         validationSet.push_back(currentName.substr(0, location));
         validationClass.push_back(stoi(currentName.substr((location + 1))));
@@ -472,14 +611,20 @@ void TCLManager::loadSets(void) {
     
 }
 
-// Loads features for training, validation, or testing sets into Mat objects
 
-void TCLManager::loadFeatures(cv::Mat& outputFeatures, cv::Mat& outputLabels, int filtersize, int setType) {
+
+
+
+// Loads features for training, validation, or testing sets into Mat objects
+void TCLManager::loadFeatures(cv::Mat& outputFeatures, cv::Mat& outputLabels, int filtersize, int setType)
+{
+    
     // Determine set types
     vector<string>* fileSet;
     vector<int>* classSet;
     
-    switch (setType) {
+    switch (setType)
+    {
         case 0:
             fileSet = &trainingSet;
             classSet = &trainingClass;
@@ -509,11 +654,14 @@ void TCLManager::loadFeatures(cv::Mat& outputFeatures, cv::Mat& outputLabels, in
     
     int i = 0;
     
-    while (featureCSV != CSVIterator()) {
+    while (featureCSV != CSVIterator())
+    {
         // If the current line includes a file from the testing set
-        if (find((*fileSet).begin(), (*fileSet).end(),(*featureCSV)[0]) != (*fileSet).end()) {
+        if (find((*fileSet).begin(), (*fileSet).end(),(*featureCSV)[0]) != (*fileSet).end())
+        {
             // Start at 1 to ignore filename column
-            for (int j = 1; j < (int)(*featureCSV).size(); j++) {
+            for (int j = 1; j < (int)(*featureCSV).size(); j++)
+            {
                 outputFeatures.at<float>(i, (j-1)) = stoi((*featureCSV)[j]);
             }
             // Normalize
@@ -522,7 +670,8 @@ void TCLManager::loadFeatures(cv::Mat& outputFeatures, cv::Mat& outputLabels, in
             
             meanStdDev(outputFeatures.row(i), mean, stddev);
             
-            for (int j = 1; j < (int)(*featureCSV).size(); j++) {
+            for (int j = 1; j < (int)(*featureCSV).size(); j++)
+            {
                 outputFeatures.at<float>(i, (j-1)) = (outputFeatures.at<float>(i, (j-1)) - mean[0]) / stddev[0];
             }
             
@@ -534,23 +683,38 @@ void TCLManager::loadFeatures(cv::Mat& outputFeatures, cv::Mat& outputLabels, in
         featureCSV++;
     }
     
+    // Check if all features were found
+    if ((*fileSet).size() != outputFeatures.rows)
+    {
+        throw runtime_error("Error: Not all features located");
+    }
+    
     // Load classifications
     outputLabels.create((int)(*classSet).size(), 1, CV_32SC1);
     
-    for (int j = 0; j < (int)(*classSet).size(); j++) {
+    for (int j = 0; j < (int)(*classSet).size(); j++)
+    {
         outputLabels.at<int>(j, 0) = (*classSet)[j];
     }
     
 }
 
 
-std::string TCLManager::generateFilename(int i) {
+
+
+
+
+std::string TCLManager::generateFilename(int i)
+{
     // Initialize new filename stringstream
     std::stringstream newFilename;
     
-    if (kernelType == "POLY") {
+    if (kernelType == "POLY")
+    {
         newFilename <<  "svm-BSIF-" << modelSizes[i] << "-" << kernelType << "-" << "degree" << "-" << modelParameter[i] << ".xml";
-    } else if (kernelType == "GAUSS") {
+    }
+    else if (kernelType == "GAUSS")
+    {
         newFilename <<  "svm-BSIF-" << modelSizes[i] << "-" << kernelType << "-" << "gamma" << "-" << modelParameter[i] << ".xml";
     }
     

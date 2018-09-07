@@ -12,7 +12,8 @@
 
 BSIFFilter::BSIFFilter(void) {}
 
-void BSIFFilter::loadFilter(int dimension, int bitlength) {
+void BSIFFilter::loadFilter(int dimension, int bitlength)
+{
     size = dimension; bits = bitlength;
     
     // Set the filter name
@@ -33,7 +34,8 @@ void BSIFFilter::loadFilter(int dimension, int bitlength) {
     myFilter = filters[filtername];
 }
 
-void BSIFFilter::generateImage(cv::Mat src, cv::Mat& dst) {
+void BSIFFilter::generateImage(cv::Mat src, cv::Mat& dst)
+{
     //initializing matrix of 1s
     cv::Mat codeImg = cv::Mat::ones(src.rows, src.cols, CV_64FC1);
     
@@ -53,10 +55,13 @@ void BSIFFilter::generateImage(cv::Mat src, cv::Mat& dst) {
     // pull the data from the matfile into an array
     // the matlab file is in one long single array
     // we need to start w/ the last filter and work our way forward
-    for (int filterNum = bits - 1; filterNum >= 0; filterNum--){
+    for (int filterNum = bits - 1; filterNum >= 0; filterNum--)
+    {
         
-        for (int row=0; row<size; row++){
-            for (int column=0; column<size; column++){
+        for (int row=0; row<size; row++)
+        {
+            for (int column=0; column<size; column++)
+            {
                 currentFilter.at<double>(row,column) = myFilter[s2i(size, bits, row, column, filterNum)];
             }
         }
@@ -68,9 +73,13 @@ void BSIFFilter::generateImage(cv::Mat src, cv::Mat& dst) {
         
         // This will convert any positive values in the matrix
         // to 2^(i-1) as it did in the matlab software
-        for (int j = 0; j < src.rows; j++){
-            for (int k = 0; k < src.cols; k++){
-                if (ci.at<double>(j+border,k+border) > (pow(10, -3))) {// ignore the extra border added on
+        for (int j = 0; j < src.rows; j++)
+        {
+            for (int k = 0; k < src.cols; k++)
+            {
+                // ignore the extra border added on
+                if (ci.at<double>(j+border,k+border) > (pow(10, -3)))
+                {
                     codeImg.at<double>(j,k) = codeImg.at<double>(j,k) + pow(2,itr);
                 }
             }
@@ -82,9 +91,17 @@ void BSIFFilter::generateImage(cv::Mat src, cv::Mat& dst) {
     cv::Mat im2 = cv::Mat(src.rows, src.cols, CV_8UC1);
     cv::normalize(codeImg, im2, 0, 255, cv::NORM_MINMAX);
     dst = im2;
+    
 }
 
-void BSIFFilter::generateHistogram(cv::Mat src, std::vector<int>& histogram) {
+
+
+
+
+
+void BSIFFilter::generateHistogram(cv::Mat src, std::vector<int>& histogram)
+{
+    
     //initializing matrix of 1s
     cv::Mat codeImg = cv::Mat::ones(src.rows, src.cols, CV_64FC1);
     
@@ -112,10 +129,13 @@ void BSIFFilter::generateHistogram(cv::Mat src, std::vector<int>& histogram) {
     // pull the data from the matfile into an array
     // the matlab file is in one long single array
     // we need to start w/ the last filter and work our way forward
-    for (int filterNum = bits - 1; filterNum >= 0; filterNum--){
+    for (int filterNum = bits - 1; filterNum >= 0; filterNum--)
+    {
         
-        for (int row=0; row<size; row++){
-            for (int column=0; column<size; column++){
+        for (int row=0; row<size; row++)
+        {
+            for (int column=0; column<size; column++)
+            {
                 currentFilter.at<double>(row,column) = myFilter[s2i(size, bits, row, column, filterNum)];
             }
         }
@@ -127,9 +147,13 @@ void BSIFFilter::generateHistogram(cv::Mat src, std::vector<int>& histogram) {
         
         // This will convert any positive values in the matrix
         // to 2^(i-1) as it did in the matlab software
-        for (int j = 0; j < src.rows; j++){
-            for (int k = 0; k < src.cols; k++){
-                if (ci.at<double>(j+border,k+border) > (pow(10, -3))) {// ignore the extra border added on
+        for (int j = 0; j < src.rows; j++)
+        {
+            for (int k = 0; k < src.cols; k++)
+            {
+                // ignore the extra border added on
+                if (ci.at<double>(j+border,k+border) > (pow(10, -3)))
+                {
                     codeImg.at<double>(j,k) = codeImg.at<double>(j,k) + pow(2,itr);
                 }
             }
@@ -138,25 +162,38 @@ void BSIFFilter::generateHistogram(cv::Mat src, std::vector<int>& histogram) {
     }
     
     // Creating the histogram
-    for (int j = 0; j < src.rows; j++){
-        for (int k = 0; k < src.cols; k++){
+    for (int j = 0; j < src.rows; j++)
+    {
+        for (int k = 0; k < src.cols; k++)
+        {
             histogram[(int)codeImg.at<double>(j,k)]++;
         }
     }
 }
 
+
+
+
+
+
 // convert linear indexing to subscript indexing
-int s2i(int size, int bits, int i, int j, int k){
+int s2i(int size, int bits, int i, int j, int k)
+{
+    
     // C++ and python use row-major order, so the last dimension is contiguous
     // in doubt, refer to https://en.wikipedia.org/wiki/Row-_and_column-major_order#Column-major_order
     return k + bits*(j+size*i);
+    
 }
 
 
 
 
+
 // build a map containing all the hard-coded ICA Filters, used to load the filters
-t_filtermap build_filter_map(){
+t_filtermap build_filter_map()
+{
+    
     // this is the map of filters
     t_filtermap filters;
     
@@ -358,5 +395,6 @@ t_filtermap build_filter_map(){
     filters.insert(t_filterpair(filterName, theFilter));
     
     return filters;
+    
 }
 
