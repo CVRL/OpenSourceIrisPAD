@@ -10,15 +10,11 @@
 
 using namespace std;
 
-featureExtractor::featureExtractor(int bits) : bitsize(bits){}
+featureExtractor::featureExtractor(int bits, vector<string>& inFilenames) : bitsize(bits), filenames(inFilenames){}
     
-void featureExtractor::extract(std::string& outDir, std::string& outName, std::string& imageDir, vector<string>& training, vector<string>& testing) {
+void featureExtractor::extract(std::string& outDir, std::string& outName, std::string& imageDir) {
     outputLocation = outDir + outName;
     imageLocation = imageDir;
-    
-    // Combine both sets into a single vector
-    filenames.insert(filenames.end(), training.begin(), training.end());
-    filenames.insert(filenames.end(), testing.begin(), testing.end());
     
     // Filter with 8 different sizes
     cout << "Filtering with size 3..." << endl;

@@ -16,9 +16,9 @@
 
 class featureExtractor {
 public:
-    featureExtractor(int bits);
+    featureExtractor(int bits, std::vector<std::string>& inFilenames);
     
-    void extract(std::string& outDir, std::string& outName, std::string& imageDir, std::vector<std::string>& training, std::vector<std::string>& testing);
+    void extract(std::string& outDir, std::string& outName, std::string& imageDir);
     
 private:
     // Filter information
@@ -31,7 +31,7 @@ private:
     std::string imageLocation;
     
     // List of filenames
-    std::vector<std::string> filenames;
+    std::vector<std::string>& filenames;
     
     // Function produces features for filter size and its double (through downsampling)
     void filter(int filterSize);

@@ -13,7 +13,12 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
-#include "filtermap.hpp"
+#include <map>
+#include <string>
+
+#include <cstdio>
+#include <iostream>
+
 
 class BSIFFilter {
 public:
@@ -33,4 +38,12 @@ private:
 };
 
 int s2i(int size, int bits, int i, int j, int k);
+
+
+// types to represent a map of filters and pairs to add to the map
+typedef std::map<std::string, double*> t_filtermap;
+typedef std::pair<std::string, double*> t_filterpair;
+
+t_filtermap build_filter_map();
+
 #endif /* BSIFFilter_hpp */
