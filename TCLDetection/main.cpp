@@ -15,7 +15,8 @@ int main(int argc, char *argv[]) {
     
     if (argc != 2)
     {
-        cout << "Error: Please enter correct arguments." << endl;
+        cout << "Usage: TCLDetection config.ini" << endl;
+        cout << "Please provide configuration file" << endl;
         return 0;
     }
     

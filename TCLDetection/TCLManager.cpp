@@ -219,7 +219,7 @@ void TCLManager::run(void)
     
     try
     {
-    loadSets();
+        loadSets();
     }
     catch (exception& e)
     {
@@ -278,7 +278,7 @@ void TCLManager::run(void)
             
             try
             {
-            loadFeatures(featuresTrain, classesTrain, modelSizes[i], TRAIN);
+                loadFeatures(featuresTrain, classesTrain, modelSizes[i], TRAIN);
             }
             catch (exception& e)
             {
@@ -359,7 +359,7 @@ void TCLManager::run(void)
                 // Load validation features
                 try
                 {
-                loadFeatures(featuresValidation, classesValidation, modelSizes[i], VALID);
+                    loadFeatures(featuresValidation, classesValidation, modelSizes[i], VALID);
                 }
                 catch (exception& e)
                 {
@@ -387,7 +387,7 @@ void TCLManager::run(void)
                 cout << "Model: " << generateFilename(i) << endl;
                 cout << "The total number incorrect is: " << numIncorrect << endl;
                 */
-                float ccr = 100 - ((float)numIncorrect / validationClass.size()) * 100;
+                float ccr = 100 - (((float)numIncorrect / validationClass.size()) * 100);
                 // cout << "CCR: " << ccr << endl << endl;
                 modelAccuracies.push_back(ccr);
                 
@@ -460,7 +460,7 @@ void TCLManager::run(void)
             // Output accuracy
             cout << "The total number incorrect is: " << numIncorrect << endl;
             
-            float ccr = 100 - ((float)numIncorrect / testingClass.size()) * 100;
+            float ccr = 100 - (((float)numIncorrect / testingClass.size()) * 100);
             cout << "CCR: " << ccr << endl;
         }
         else
@@ -475,7 +475,7 @@ void TCLManager::run(void)
                 // Load testing features
                 try
                 {
-                loadFeatures(featuresTest, classesTest, modelSizes[i], TEST);
+                    loadFeatures(featuresTest, classesTest, modelSizes[i], TEST);
                 }
                 catch (exception& e)
                 {
@@ -625,22 +625,22 @@ void TCLManager::loadFeatures(cv::Mat& outputFeatures, cv::Mat& outputLabels, in
     
     switch (setType)
     {
-        case 0:
+        case TRAIN:
             fileSet = &trainingSet;
             classSet = &trainingClass;
             break;
-        case 1:
+        case VALID:
             fileSet = &validationSet;
             classSet = &validationClass;
             break;
-        case 2:
+        case TEST:
             fileSet = &testingSet;
             classSet = &testingClass;
             break;
         default:
             fileSet = NULL;
             classSet = NULL;
-            // Add exception handling here
+            throw runtime_error("Error: Invalid set type");
     }
     
     // Allocate storage for the output features (rows = number of samples, columns = size of histogram)
@@ -662,7 +662,7 @@ void TCLManager::loadFeatures(cv::Mat& outputFeatures, cv::Mat& outputLabels, in
             // Start at 1 to ignore filename column
             for (int j = 1; j < (int)(*featureCSV).size(); j++)
             {
-                outputFeatures.at<float>(i, (j-1)) = stoi((*featureCSV)[j]);
+                outputFeatures.at<float>(i, (j-1)) = stof((*featureCSV)[j]);
             }
             // Normalize
             cv::Scalar mean;
