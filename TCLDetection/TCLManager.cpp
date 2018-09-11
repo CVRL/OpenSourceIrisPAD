@@ -684,7 +684,7 @@ void TCLManager::loadFeatures(cv::Mat& outputFeatures, cv::Mat& outputLabels, in
     }
     
     // Check if all features were found
-    if ((*fileSet).size() != outputFeatures.rows)
+    if ((int)(*fileSet).size() != outputFeatures.rows)
     {
         throw runtime_error("Error: Not all features located");
     }
