@@ -13,7 +13,6 @@
 #include "featureExtractor.hpp"
 
 #define TRAIN 0
-#define VALID 1
 #define TEST 2
 
 class TCLManager
@@ -40,12 +39,8 @@ private:
     std::string splitDir;
     std::string trainingSetFilename;
     std::string testingSetFilename;
-    std::string validationSetFilename;
     std::string trainingSizes;
     std::vector<int> modelSizes;
-    std::string kernelType;
-    std::string parameterString;
-    std::vector<double> modelParameter;
     
     
     // Outputs
@@ -64,12 +59,10 @@ private:
     // List of filenames for each set
     std::vector<std::string> trainingSet;
     std::vector<std::string> testingSet;
-    std::vector<std::string> validationSet;
     
     // List of classifications for each set
     std::vector<int> trainingClass;
     std::vector<int> testingClass;
-    std::vector<int> validationClass;
     
     void initConfig(void);
     
