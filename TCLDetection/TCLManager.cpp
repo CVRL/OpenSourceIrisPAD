@@ -256,8 +256,7 @@ void TCLManager::run(void)
         for (int i = 0; i < (int)modelSizes.size(); i++)
         {
             std::cout << "Training model " << (i + 1) << " out of " << modelSizes.size() << "..." << endl;
-            std::cout << "  BSIF size " << modelSizes[i] << endl;
-            std::cout << "  Kernel RBF " << endl;
+            std::cout << "  BSIF size " << modelSizes[i] << " | Kernel RBF " << endl;
             
             // Load training data for current size
             cv::Mat featuresTrain;
@@ -272,6 +271,7 @@ void TCLManager::run(void)
                 throw e;
             }
             
+            
             // Place into trainData
             Ptr<TrainData> trainingData = TrainData::create(featuresTrain, ROW_SAMPLE, classesTrain);
             
@@ -282,6 +282,7 @@ void TCLManager::run(void)
             // Set parameters
             svmGauss->setType(SVM::C_SVC);
             svmGauss->setKernel(SVM::RBF);
+            
             
             // Train model and save
             svmGauss->trainAuto(trainingData);
@@ -341,6 +342,7 @@ void TCLManager::run(void)
                     throw e;
                 }
                 
+                
                 // New Mat for results
                 cv::Mat individualResults(classesTest.rows, classesTest.cols, CV_32FC1);
                 
@@ -386,17 +388,18 @@ void TCLManager::run(void)
                 }
                 
                 // Determine if incorrect
-                if (overallResult[i] != testingClass[i])
+                if (overallResult[i] != classesTest.at<int>(i,0))
                 {
                     numIncorrect++;
                 }
             }
             
             // Output accuracy
-            float ccr = 100 - (((float)numIncorrect / testingClass.size()) * 100);
+            float ccr = 100 - (((float)numIncorrect / classesTest.rows) * 100);
             
             cout << "The total number incorrect is: " << numIncorrect << endl;
             cout << "CCR: " << ccr << endl;
+            
         }
         else
         {
@@ -426,16 +429,16 @@ void TCLManager::run(void)
                 // Determine number incorrect
                 int numIncorrect = 0;
                 
-                for (int j = 0; j < (int)testingClass.size(); j++)
+                for (int j = 0; j < classesTest.rows; j++)
                 {
-                    if (individualResults.at<float>(j,0) != testingClass[j])
+                    if (individualResults.at<float>(j,0) != classesTest.at<int>(j,0))
                     {
                         numIncorrect++;
                     }
                 }
                 
                 // Output accuracy
-                float ccr = 100 - ((float)numIncorrect / testingClass.size()) * 100;
+                float ccr = 100 - ((float)numIncorrect / classesTest.rows) * 100;
                 
                 cout << "Model: " << generateFilename(i) << endl;
                 cout << "The total number incorrect is: " << numIncorrect << endl;
@@ -552,8 +555,9 @@ void TCLManager::loadFeatures(cv::Mat& outputFeatures, cv::Mat& outputLabels, in
             throw runtime_error("Error: Invalid set type");
     }
     
-    // Allocate storage for the output features (rows = number of samples, columns = size of histogram)
+    // Allocate storage for the output features (rows = number of samples, columns = size of histogram) and for output labels
     outputFeatures.create((int)(*fileSet).size(), pow(2,bitsize), CV_32FC1);
+    outputLabels.create((int)(*classSet).size(), 1, CV_32SC1);
     
     // Load features
     stringstream featureFilename;
@@ -568,11 +572,14 @@ void TCLManager::loadFeatures(cv::Mat& outputFeatures, cv::Mat& outputLabels, in
         // If the current line includes a file from the testing set
         if (find((*fileSet).begin(), (*fileSet).end(),(*featureCSV)[0]) != (*fileSet).end())
         {
+            
             // Start at 1 to ignore filename column
             for (int j = 1; j < (int)(*featureCSV).size(); j++)
             {
                 outputFeatures.at<float>(i, (j-1)) = stof((*featureCSV)[j]);
             }
+            
+            
             // Normalize
             cv::Scalar mean;
             cv::Scalar stddev;
@@ -583,6 +590,17 @@ void TCLManager::loadFeatures(cv::Mat& outputFeatures, cv::Mat& outputLabels, in
             {
                 outputFeatures.at<float>(i, (j-1)) = (outputFeatures.at<float>(i, (j-1)) - mean[0]) / stddev[0];
             }
+            
+            
+            /* Load class into Mat
+            Since we are adding the features in the order they appear in the feature csv, and not necessarily in the order of the file set, we need to make sure that the classes are added in the same order.
+             */
+            
+            
+            // Find index where current file is
+            int idx = (int)(find((*fileSet).begin(), (*fileSet).end(), (*featureCSV)[0]) - (*fileSet).begin());
+            
+            outputLabels.at<int>(i,0) = (*classSet)[idx];
             
             // Increment the output features counter
             i++;
@@ -596,14 +614,6 @@ void TCLManager::loadFeatures(cv::Mat& outputFeatures, cv::Mat& outputLabels, in
     if ((int)(*fileSet).size() != outputFeatures.rows)
     {
         throw runtime_error("Error: Not all features located");
-    }
-    
-    // Load classifications
-    outputLabels.create((int)(*classSet).size(), 1, CV_32SC1);
-    
-    for (int j = 0; j < (int)(*classSet).size(); j++)
-    {
-        outputLabels.at<int>(j, 0) = (*classSet)[j];
     }
     
 }
