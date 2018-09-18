@@ -31,7 +31,7 @@ TCLManager::TCLManager(void)
     
     mapString["Feature extraction destination file"] = &outputExtractionFilename;
     mapString["Feature extraction destination directory"] = &outputExtractionDir;
-    mapString["Model output directory"] = &modelOutputDir;
+    mapString["Model directory"] = &modelOutputDir;
     
     
     mapInt["Bitsize"] = &bitsize;
@@ -491,40 +491,51 @@ void TCLManager::loadSets(void)
     size_t location;
     
     // Training sets
-    ifstream train;
-    train.open(splitDir + trainingSetFilename);
-    
-    if (! train.good())
+    if (trainingSetFilename != "")
     {
-        throw runtime_error("Error: training split not found in " + trainingSetFilename);
+        
+        ifstream train;
+        train.open(splitDir + trainingSetFilename);
+        
+        if (! train.good())
+        {
+            throw runtime_error("Error: training split not found in " + trainingSetFilename);
+        }
+        
+        while (getline(train, currentName))
+        {
+            location = currentName.find(",");
+            trainingSet.push_back(currentName.substr(0, location));
+            trainingClass.push_back(stoi(currentName.substr((location + 1))));
+        }
+        
+        train.close();
+        
     }
-    
-    while (getline(train, currentName))
-    {
-        location = currentName.find(",");
-        trainingSet.push_back(currentName.substr(0, location));
-        trainingClass.push_back(stoi(currentName.substr((location + 1))));
-    }
-    
-    train.close();
     
     // Testing sets
-    ifstream test;
-    test.open(splitDir + testingSetFilename);
-    currentName = "";
-    
-    if (! test.good())
+    if (testingSetFilename != "")
     {
-        throw runtime_error("Error: testing split not found in " + testingSetFilename);
+        
+        ifstream test;
+        test.open(splitDir + testingSetFilename);
+        currentName = "";
+        
+        if (! test.good())
+        {
+            throw runtime_error("Error: testing split not found in " + testingSetFilename);
+        }
+        
+        while (getline(test, currentName))
+        {
+            location = currentName.find(",");
+            testingSet.push_back(currentName.substr(0, location));
+            testingClass.push_back(stoi(currentName.substr((location + 1))));
+        }
+        test.close();
+        
     }
     
-    while (getline(test, currentName))
-    {
-        location = currentName.find(",");
-        testingSet.push_back(currentName.substr(0, location));
-        testingClass.push_back(stoi(currentName.substr((location + 1))));
-    }
-    test.close();
 }
 
 
