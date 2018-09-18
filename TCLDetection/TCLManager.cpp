@@ -23,7 +23,7 @@ TCLManager::TCLManager(void)
     mapBool["Majority voting"] = &majorityVoting;
     
     mapString["Database image directory"] = &imageDir;
-    mapString["Split directory"] = &splitDir;
+    mapString["CSV directory"] = &splitDir;
     mapString["Training set filename"] = &trainingSetFilename;
     mapString["Testing set filename"] = &testingSetFilename;
     mapString["Training sizes"] = &trainingSizes;
@@ -210,7 +210,7 @@ void TCLManager::run(void)
     {
         loadSets();
     }
-    catch (exception& e)
+    catch (runtime_error& e)
     {
         throw e;
     }
@@ -239,7 +239,7 @@ void TCLManager::run(void)
         {
             newExtractor.extract(outputExtractionDir, outputExtractionFilename, imageDir);
         }
-        catch (exception& e)
+        catch (runtime_error& e)
         {
             throw e;
         }
@@ -266,7 +266,7 @@ void TCLManager::run(void)
             {
                 loadFeatures(featuresTrain, classesTrain, modelSizes[i], TRAIN);
             }
-            catch (exception& e)
+            catch (runtime_error& e)
             {
                 throw e;
             }
@@ -337,7 +337,7 @@ void TCLManager::run(void)
                 {
                 loadFeatures(featuresTest, classesTest, modelSizes[i], TEST);
                 }
-                catch (exception& e)
+                catch (runtime_error& e)
                 {
                     throw e;
                 }
@@ -415,7 +415,7 @@ void TCLManager::run(void)
                 {
                     loadFeatures(featuresTest, classesTest, modelSizes[i], TEST);
                 }
-                catch (exception& e)
+                catch (runtime_error& e)
                 {
                     throw e;
                 }
@@ -577,6 +577,11 @@ void TCLManager::loadFeatures(cv::Mat& outputFeatures, cv::Mat& outputLabels, in
     CSVIterator featureCSV(featureFile);
     
     int i = 0;
+    
+    if (featureCSV == CSVIterator())
+    {
+        throw runtime_error("Error: Unable to load feature files");
+    }
     
     while (featureCSV != CSVIterator())
     {

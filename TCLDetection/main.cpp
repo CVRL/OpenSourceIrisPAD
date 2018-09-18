@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
     {
         tcl.run();
     }
-    catch (exception& e)
+    catch (runtime_error& e)
     {
         cout << e.what() << endl;
     }
