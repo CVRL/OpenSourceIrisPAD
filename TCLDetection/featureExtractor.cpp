@@ -24,7 +24,7 @@ void featureExtractor::extract(std::string& outDir, std::string& outName, std::s
     {
         filter(3);
     }
-    catch (exception& e)
+    catch (runtime_error& e)
     {
         throw e;
     }
@@ -35,7 +35,7 @@ void featureExtractor::extract(std::string& outDir, std::string& outName, std::s
     {
         filter(5);
     }
-    catch (exception& e)
+    catch (runtime_error& e)
     {
         throw e;
     }
@@ -46,7 +46,7 @@ void featureExtractor::extract(std::string& outDir, std::string& outName, std::s
     {
         filter(7);
     }
-    catch (exception& e)
+    catch (runtime_error& e)
     {
         throw e;
     }
@@ -57,7 +57,7 @@ void featureExtractor::extract(std::string& outDir, std::string& outName, std::s
     {
         filter(9);
     }
-    catch (exception& e)
+    catch (runtime_error& e)
     {
         throw e;
     }
@@ -68,7 +68,7 @@ void featureExtractor::extract(std::string& outDir, std::string& outName, std::s
     {
         filter(11);
     }
-    catch (exception& e)
+    catch (runtime_error& e)
     {
         throw e;
     }
@@ -79,7 +79,7 @@ void featureExtractor::extract(std::string& outDir, std::string& outName, std::s
     {
         filter(13);
     }
-    catch (exception& e)
+    catch (runtime_error& e)
     {
         throw e;
     }
@@ -90,7 +90,7 @@ void featureExtractor::extract(std::string& outDir, std::string& outName, std::s
     {
         filter(15);
     }
-    catch (exception& e)
+    catch (runtime_error& e)
     {
         throw e;
     }
@@ -101,7 +101,7 @@ void featureExtractor::extract(std::string& outDir, std::string& outName, std::s
     {
         filter(17);
     }
-    catch (exception& e)
+    catch (runtime_error& e)
     {
         throw e;
     }
@@ -142,6 +142,10 @@ void featureExtractor::filter(int filterSize)
         
         // Load image from file
         cv::Mat image = cv::imread((imageLocation + filenames[i]), 0);
+        
+        
+        
+        
         if ( image.empty() )
         {
             throw runtime_error("Error: unable to read image " + filenames[i] + " for feature extraction.");
@@ -172,7 +176,6 @@ void featureExtractor::filter(int filterSize)
         std::fill(histogram.begin(), histogram.end(), 0);
     }
 
-    
     // Close files
     histOut.close();
     downHistOut.close();

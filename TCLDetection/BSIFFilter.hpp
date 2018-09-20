@@ -1,8 +1,7 @@
 //
 //  BSIFFilter.hpp
 //  TCLDetection
-//
-//  Created by Joseph McGrath on 7/11/18.
+
 
 
 #ifndef BSIFFilter_hpp

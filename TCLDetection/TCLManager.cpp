@@ -1,8 +1,7 @@
 //
 //  TCLManager.cpp
 //  TCLDetection
-//
-//  Created by Joseph McGrath on 7/17/18.
+
 
 #include "TCLManager.hpp"
 #include "tclUtil.h"
@@ -11,6 +10,9 @@
 using namespace std;
 using namespace cv;
 using namespace cv::ml;
+
+
+/* Manager structure based on OSIRIS: The method for reading in a configuration file and the basic flow from configuration to showing configuration to running are both based on a similar structure within OSIRIS. */
 
 // Default constructor
 TCLManager::TCLManager(void)
@@ -214,6 +216,7 @@ void TCLManager::run(void)
     {
         throw e;
     }
+
 
     if (extractFeatures)
     {
@@ -625,13 +628,7 @@ void TCLManager::loadFeatures(cv::Mat& outputFeatures, cv::Mat& outputLabels, in
         // Increment the CSV line
         featureCSV++;
     }
-    
-    // Check if all features were found
-    if ((int)(*fileSet).size() != outputFeatures.rows)
-    {
-        throw runtime_error("Error: Not all features located");
-    }
-    
+   
 }
 
 

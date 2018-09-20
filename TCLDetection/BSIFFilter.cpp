@@ -1,8 +1,8 @@
 //
 //  BSIFFilter.cpp
 //  TCLDetection
-//
-//  Created by Joseph McGrath on 7/11/18.
+
+// Based on methods found at http://www.ee.oulu.fi/~jkannala/bsif/bsif.html
 
 
 #include "BSIFFilter.hpp"

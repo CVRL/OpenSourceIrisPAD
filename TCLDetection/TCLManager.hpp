@@ -1,8 +1,7 @@
 //
 //  TCLManager.h
 //  TCLDetection
-//
-//  Created by Joseph McGrath on 9/6/18.
+
 
 
 #ifndef TCLManager_h

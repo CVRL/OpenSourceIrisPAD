@@ -1,8 +1,7 @@
 //
 //  featureExtractor.hpp
 //  TCLDetection
-//
-//  Created by Joseph McGrath on 7/27/18.
+
 
 
 #ifndef featureExtractor_hpp

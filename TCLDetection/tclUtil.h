@@ -1,8 +1,7 @@
 //
 //  tclUtil.h
 //  TCLDetection
-//
-//  Created by Joseph McGrath on 9/6/18.
+
 
 #ifndef tclUtil_h
 #define tclUtil_h
@@ -79,7 +78,10 @@ private:
     CSVRow              m_row;
 };
 
+
+
 // String utilities based on those in OSIRIS
+
 class tclStringUtil {
 public:
     /** Convert a string into any basic type.
