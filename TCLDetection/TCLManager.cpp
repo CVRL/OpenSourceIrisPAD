@@ -24,11 +24,11 @@ TCLManager::TCLManager(void)
     mapBool["Test images"] = &testImages;
     mapBool["Majority voting"] = &majorityVoting;
     
-    mapString["Database image directory"] = &imageDir;
+    mapString["Image directory"] = &imageDir;
     mapString["CSV directory"] = &splitDir;
     mapString["Training set filename"] = &trainingSetFilename;
     mapString["Testing set filename"] = &testingSetFilename;
-    mapString["Training sizes"] = &trainingSizes;
+    mapString["Sizes"] = &trainingSizes;
     
     
     mapString["Feature extraction destination file"] = &outputExtractionFilename;
@@ -514,6 +514,10 @@ void TCLManager::loadSets(void)
         
         train.close();
         
+    } else if (trainModel)
+    {
+        // if model training is requested but no file is given
+        throw runtime_error("Error: please specify a list of images for training (training set filename)");
     }
     
     // Testing sets
@@ -537,6 +541,10 @@ void TCLManager::loadSets(void)
         }
         test.close();
         
+    } else if (testImages)
+    {
+        // if image testing is requested but no file is given
+        throw runtime_error("Error: please specify a list of images for testing (testing set filename)");
     }
     
 }
