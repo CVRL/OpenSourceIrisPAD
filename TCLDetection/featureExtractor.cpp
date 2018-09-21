@@ -1,8 +1,7 @@
 //
 //  featureExtractor.cpp
 //  TCLDetection
-//
-//  Created by Joseph McGrath on 7/27/18.
+
 
 
 #include "featureExtractor.hpp"
