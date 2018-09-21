@@ -636,7 +636,13 @@ void TCLManager::loadFeatures(cv::Mat& outputFeatures, cv::Mat& outputLabels, in
         // Increment the CSV line
         featureCSV++;
     }
-   
+    
+    // Check to ensure that the number of feature vectors retrieved is equal to the number requested
+    if (i != (*classSet).size())
+    {
+        throw runtime_error("Error: unable to locate all features.");
+    }
+    
 }
 
 
