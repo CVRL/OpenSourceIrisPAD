@@ -136,9 +136,12 @@ void featureExtractor::filter(int filterSize)
     // Loop through images
     for (int i = 0; i < (int)filenames.size(); i++)
     {
+        
+        /*
         // Display progress
         std::cout << "Processing sample " << (i + 1) << " out of " << filenames.size() << endl;
         cout << filenames[i] << endl;
+        */
         
         // Load image from file
         cv::Mat image = cv::imread((imageLocation + filenames[i]), 0);
