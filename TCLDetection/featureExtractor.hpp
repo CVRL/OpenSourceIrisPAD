@@ -16,13 +16,18 @@
 class featureExtractor
 {
 public:
-    featureExtractor(int bits, std::vector<std::string>& inFilenames);
+    featureExtractor(int bits, std::vector<std::string>& inFilenames, std::string& segmentationType);
     
     void extract(std::string& outDir, std::string& outName, std::string& imageDir);
+    
+    void extract(std::string& outDir, std::string& outName, std::string& imageDir, int filtersize);
     
 private:
     // Filter information
     int bitsize;
+    
+    // Segmentation information
+    std::string segmentation;
     
     // Output information
     std::string outputLocation;

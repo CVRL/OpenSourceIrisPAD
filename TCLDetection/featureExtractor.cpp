@@ -9,8 +9,23 @@
 
 using namespace std;
 
-featureExtractor::featureExtractor(int bits, vector<string>& inFilenames) : bitsize(bits), filenames(inFilenames){}
+featureExtractor::featureExtractor(int bits, vector<string>& inFilenames, std::string& segmentationType) : bitsize(bits), filenames(inFilenames), segmentation(segmentationType){}
+
+void featureExtractor::extract(std::string& outDir, std::string& outName, std::string& imageDir, int filtersize)
+{
+    outputLocation = outDir + outName;
+    imageLocation = imageDir;
     
+    try
+    {
+        filter(filtersize);
+    }
+    catch (runtime_error& e)
+    {
+        throw e;
+    }
+}
+
 void featureExtractor::extract(std::string& outDir, std::string& outName, std::string& imageDir)
 {
     
@@ -153,14 +168,30 @@ void featureExtractor::filter(int filterSize)
             throw runtime_error("Error: unable to read image " + filenames[i] + " for feature extraction.");
         }
         
+        // Segmentation
+        cv::Mat imageToUse;
+        if (segmentation == "wi")
+        {
+            imageToUse = image;
+        }
+        else if (segmentation == "bg")
+        {
+            imageToUse = image(cv::Rect(195, 125, 250, 250));
+        }
+        else
+        {
+            throw runtime_error("Error: invalid segmentation type " + segmentation);
+        }
+        
         // Save image information
         histOut << filenames[i] << ",";
         downHistOut << filenames[i] << ",";
         
         // Calculate histograms for full sized image
-        currentFilter.generateHistogram(image, histogram);
+        currentFilter.generateHistogram(imageToUse, histogram);
         
         // Ignore 0 position in histogram (image initialized to 1s in BSIFfilter so no 0s will be present)
+        // Only go to (histsize - 1) to output endl after last
         for (int i = 1; i < (histsize - 1); i++) histOut << histogram[i] << ",";
         // Need to output endl after last column instead of ","
         histOut << histogram[histsize - 1] << std::endl;
@@ -168,7 +199,7 @@ void featureExtractor::filter(int filterSize)
         
         // Downsample image by 50% in either direction
         cv::Mat downImage;
-        cv::pyrDown(image, downImage, cv::Size(image.cols / 2, image.rows / 2));
+        cv::pyrDown(imageToUse, downImage, cv::Size(imageToUse.cols / 2, imageToUse.rows / 2));
         
         // Run filter on downsampled image (simulates doubling of BSIF kernel size)
         currentFilter.generateHistogram(downImage, histogram);

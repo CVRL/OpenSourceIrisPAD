@@ -31,6 +31,7 @@ private:
     bool trainModel;
     bool testImages;
     bool majorityVoting;
+    std::string segmentationType;
     
     
     // Inputs

@@ -1,7 +1,12 @@
-# OpenSourceIrisPAD
+# OpenSourceIrisPAD (v1.1 - 30 October 2018)
 
 
-This repo contains the open-source (planned) implementation of iris PAD based on BSIF and a fusion of multiple classifiers, and is based on Jay Doyle's paper: "Robust Detection of Textured Contact Lenses in Iris Recognition Using BSIF", IEEE Access, 2015 (https://ieeexplore.ieee.org/document/7264974/).
+This repo contains the open-source implementation of iris PAD based on BSIF and a fusion of multiple classifiers, and is based on Jay Doyle's paper: "Robust Detection of Textured Contact Lenses in Iris Recognition Using BSIF", IEEE Access, 2015 (https://ieeexplore.ieee.org/document/7264974/).
+
+## Updates
+
+- Added the option to choose whole image or best guess segmentation (using the best guess specified in Jay Doyle's paper)
+- Added automatic feature extraction in the case of missing features when using the training or testing settings
 
 ## Requirements
 

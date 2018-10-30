@@ -23,6 +23,7 @@ TCLManager::TCLManager(void)
     mapBool["Train model"] = &trainModel;
     mapBool["Test images"] = &testImages;
     mapBool["Majority voting"] = &majorityVoting;
+    mapString["Segmentation"] = &segmentationType;
     
     mapString["Image directory"] = &imageDir;
     mapString["CSV directory"] = &splitDir;
@@ -109,14 +110,14 @@ void TCLManager::loadConfig(const std::string& Filename)
         }
     }
     
-    // Determine models from trainingSizes string
-    std::stringstream modelStream(trainingSizes);
+    // Determine model sizes from trainingSizes string
+    std::stringstream sizesStream(trainingSizes);
     
-    std::string currentNum;
+    std::string currentString;
     
-    while (getline(modelStream, currentNum, ','))
+    while (getline(sizesStream, currentString, ','))
     {
-        modelSizes.push_back(stoi(currentNum));
+        modelSizes.push_back(stoi(currentString));
     }
     
 }
@@ -156,6 +157,7 @@ void TCLManager::showConfig(void)
         cout << "=============" << endl;
         cout << "- Features will be stored in directory: " << outputExtractionDir << endl;
         cout << "- Feature filenames will be in format: " << outputExtractionFilename + "_filter_size_size_bits.csv" << endl;
+        cout << "- Segmentation type: " << segmentationType << endl;
         cout << "=============" << endl;
     }
     
@@ -235,7 +237,7 @@ void TCLManager::run(void)
         extractionFilenames.insert(extractionFilenames.end(), testingSet.begin(), testingSet.end());
         
         // Declare new feature extractor
-        featureExtractor newExtractor(bitsize, extractionFilenames);
+        featureExtractor newExtractor(bitsize, extractionFilenames, segmentationType);
         
         // Extract
         try
@@ -333,6 +335,7 @@ void TCLManager::run(void)
             // Results vector
             vector<cv::Mat> results;
             
+            // Determine individual results
             for (int i = 0; i < (int)testingModels.size(); i++)
             {
                 // Load testing features
@@ -369,9 +372,12 @@ void TCLManager::run(void)
                 
                 for (int j = 0; j < (int)testingModels.size(); j++)
                 {
-                    if (results[j].at<float>(i,0) == 1) {
+                    if (results[j].at<float>(i,0) == 1)
+                    {
                         inFavor++;
-                    } else {
+                    }
+                    else
+                    {
                         against++;
                     }
                 }
@@ -465,6 +471,8 @@ void TCLManager::initConfig(void)
     trainModel = false;
     testImages = false;
     majorityVoting = false;
+    segmentationType = "wi";
+    
     
     // Inputs
     imageDir = "";
@@ -577,15 +585,57 @@ void TCLManager::loadFeatures(cv::Mat& outputFeatures, cv::Mat& outputLabels, in
             throw runtime_error("Error: Invalid set type");
     }
     
+    // Make copy of sets to track features loaded
+    vector<string> trackingSet = *fileSet;
+    
+    // Open file
+    stringstream featureFilename;
+    featureFilename << outputExtractionDir << outputExtractionFilename << "_filter_" << filtersize << "_" << filtersize << "_" << bitsize << ".csv";
+    ifstream featureFile(featureFilename.str());
+    
+    // Loop through .csv to determine if all features are present
+    CSVIterator testCSV(featureFile);
+    
+    while (testCSV != CSVIterator())
+    {
+        // Search the fileset
+        vector<string>::iterator fileLocation = find((*fileSet).begin(), (*fileSet).end(),(*testCSV)[0]);
+        
+        // If the current line includes a file from the testing set
+        if (fileLocation != (*fileSet).end())
+        {
+            // Remove the features loaded from the filelist
+            trackingSet.erase(find(trackingSet.begin(), trackingSet.end(),(*testCSV)[0]));
+        }
+        
+        testCSV++;
+    }
+    
+    // Extract missing features if necessary
+    if (trackingSet.size() != 0)
+    {
+        cout << "Extracting missing features..." << endl;
+        
+        // Loop through files with missing features and add to .csv files
+        featureExtractor newExtractor(bitsize, trackingSet, segmentationType);
+        try
+        {
+           newExtractor.extract(outputExtractionDir, outputExtractionFilename, imageDir, filtersize);
+        }
+        catch (runtime_error& e)
+        {
+            throw e;
+        }
+    }
+    
     // Allocate storage for the output features (rows = number of samples, columns = size of histogram) and for output labels
     outputFeatures.create((int)(*fileSet).size(), pow(2,bitsize), CV_32FC1);
     outputLabels.create((int)(*classSet).size(), 1, CV_32SC1);
     
     // Load features
-    stringstream featureFilename;
-    featureFilename << outputExtractionDir << outputExtractionFilename << "_filter_" << filtersize << "_" << filtersize << "_" << bitsize << ".csv";
-    ifstream featureFile(featureFilename.str());
-    CSVIterator featureCSV(featureFile);
+    // reopen file
+    ifstream featureFileAgain(featureFilename.str());
+    CSVIterator featureCSV(featureFileAgain);
     
     int i = 0;
     
@@ -596,8 +646,11 @@ void TCLManager::loadFeatures(cv::Mat& outputFeatures, cv::Mat& outputLabels, in
     
     while (featureCSV != CSVIterator())
     {
+        // Search the fileset
+        vector<string>::iterator fileLocation = find((*fileSet).begin(), (*fileSet).end(),(*featureCSV)[0]);
+        
         // If the current line includes a file from the testing set
-        if (find((*fileSet).begin(), (*fileSet).end(),(*featureCSV)[0]) != (*fileSet).end())
+        if (fileLocation != (*fileSet).end())
         {
             
             // Start at 1 to ignore filename column
@@ -625,13 +678,14 @@ void TCLManager::loadFeatures(cv::Mat& outputFeatures, cv::Mat& outputLabels, in
             
             
             // Find index where current file is
-            int idx = (int)(find((*fileSet).begin(), (*fileSet).end(), (*featureCSV)[0]) - (*fileSet).begin());
+            int idx = (int)(fileLocation - (*fileSet).begin());
             
             outputLabels.at<int>(i,0) = (*classSet)[idx];
             
             // Increment the output features counter
             i++;
         }
+        
         
         // Increment the CSV line
         featureCSV++;
@@ -654,7 +708,7 @@ std::string TCLManager::generateFilename(int i)
 {
     // Initialize new filename stringstream
     std::stringstream newFilename;
-    newFilename <<  "svm-BSIF-" << modelSizes[i] << "-" << "RBF" << ".xml";
+    newFilename <<  "BSIF-" << modelSizes[i] << "-" << segmentationType << ".xml";
     
     return newFilename.str();
 }
