@@ -56,6 +56,8 @@ In this release, 360 (120 feature sets * 3 model types) models have been include
 - Johnson&Johnson
 - CooperVision
 
+To access these models, go to https://notredame.box.com/v/OpenSourceIrisPADModels.
+
 ### Image testing
 
 If image testing is selected, the models specified in the configuration file will be used to classify the images in the testing set.  You may choose to use majority voting to group the ensemble of models, or test each model individually.
