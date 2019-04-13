@@ -30,7 +30,7 @@ void BSIFFilter::loadFilter(int dimension, int bitlength)
     t_filtermap filters = build_filter_map();
     
     // Retrieve filter from filtermap
-    double* myFilter;
+    // double* myFilter;
     myFilter = filters[filtername];
 }
 
@@ -89,7 +89,7 @@ void BSIFFilter::generateImage(cv::Mat src, cv::Mat& dst)
     
     
     cv::Mat im2 = cv::Mat(src.rows, src.cols, CV_8UC1);
-    cv::normalize(codeImg, im2, 0, 255, cv::NORM_MINMAX);
+    cv::normalize(codeImg, im2, 0, 255, cv::NORM_MINMAX, CV_8UC1);
     dst = im2;
     
 }
@@ -110,6 +110,7 @@ void BSIFFilter::generateHistogram(cv::Mat src, std::vector<int>& histogram)
     cv::Mat imgWrap = src;
     cv::copyMakeBorder(src, imgWrap, border, border, border, border, cv::BORDER_WRAP);
     
+    /*
     // load the hard-coded filters
     t_filtermap filters = build_filter_map();
     // here we retrieve a filter from the map
@@ -118,7 +119,7 @@ void BSIFFilter::generateHistogram(cv::Mat src, std::vector<int>& histogram)
     
     double* myFilter;
     myFilter = filters[filtername];
-    
+    */
     // the textured image after filter
     cv::Mat ci;
     
@@ -177,12 +178,12 @@ void BSIFFilter::generateHistogram(cv::Mat src, std::vector<int>& histogram)
 
 
 // convert linear indexing to subscript indexing
-int s2i(int size, int bits, int i, int j, int k)
+int s2i(int size, int bits, int row, int col, int bit)
 {
     
     // C++ and python use row-major order, so the last dimension is contiguous
     // in doubt, refer to https://en.wikipedia.org/wiki/Row-_and_column-major_order#Column-major_order
-    return k + bits*(j+size*i);
+    return bit + bits*(col+size*row);
     
 }
 
@@ -198,7 +199,9 @@ t_filtermap build_filter_map()
     t_filtermap filters;
     
     // we have to add all filters to the map
+    
     // 3x3 filters
+    
     std::string filterName = "filter_3_3_5";
     double* theFilter = &filter_3_3_5[0];
     filters.insert(t_filterpair(filterName, theFilter));
@@ -211,6 +214,7 @@ t_filtermap build_filter_map()
     filterName = "filter_3_3_8";
     theFilter = &filter_3_3_8[0];
     filters.insert(t_filterpair(filterName, theFilter));
+    
     
     // 5x5 filters
     filterName = "filter_5_5_5";
@@ -393,7 +397,137 @@ t_filtermap build_filter_map()
     filterName = "filter_17_17_12";
     theFilter = &filter_17_17_12[0];
     filters.insert(t_filterpair(filterName, theFilter));
+    /*
+    // 19x19 filters
+    filterName = "filter_19_19_5";
+    theFilter = &filter_19_19_5[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_19_19_6";
+    theFilter = &filter_19_19_6[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_19_19_7";
+    theFilter = &filter_19_19_7[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_19_19_8";
+    theFilter = &filter_19_19_8[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_19_19_9";
+    theFilter = &filter_19_19_9[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_19_19_10";
+    theFilter = &filter_19_19_10[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_19_19_11";
+    theFilter = &filter_19_19_11[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_19_19_12";
+    theFilter = &filter_19_19_12[0];
+    filters.insert(t_filterpair(filterName, theFilter));
     
+    // 21x21 filters
+    filterName = "filter_21_21_5";
+    theFilter = &filter_21_21_5[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_21_21_6";
+    theFilter = &filter_21_21_6[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_21_21_7";
+    theFilter = &filter_21_21_7[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_21_21_8";
+    theFilter = &filter_21_21_8[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_21_21_9";
+    theFilter = &filter_21_21_9[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_21_21_10";
+    theFilter = &filter_21_21_10[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_21_21_11";
+    theFilter = &filter_21_21_11[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_21_21_12";
+    theFilter = &filter_21_21_12[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    
+    // 27x27 filters
+    filterName = "filter_27_27_5";
+    theFilter = &filter_27_27_5[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_27_27_6";
+    theFilter = &filter_27_27_6[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_27_27_7";
+    theFilter = &filter_27_27_7[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_27_27_8";
+    theFilter = &filter_27_27_8[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_27_27_9";
+    theFilter = &filter_27_27_9[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_27_27_10";
+    theFilter = &filter_27_27_10[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_27_27_11";
+    theFilter = &filter_27_27_11[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_27_27_12";
+    theFilter = &filter_27_27_12[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    
+    // 33x33 filters
+    filterName = "filter_33_33_5";
+    theFilter = &filter_33_33_5[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_33_33_6";
+    theFilter = &filter_33_33_6[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_33_33_7";
+    theFilter = &filter_33_33_7[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_33_33_8";
+    theFilter = &filter_33_33_8[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_33_33_9";
+    theFilter = &filter_33_33_9[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_33_33_10";
+    theFilter = &filter_33_33_10[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_33_33_11";
+    theFilter = &filter_33_33_11[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_33_33_12";
+    theFilter = &filter_33_33_12[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    
+    // 39x39 filters
+    filterName = "filter_39_39_5";
+    theFilter = &filter_39_39_5[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_39_39_6";
+    theFilter = &filter_39_39_6[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_39_39_7";
+    theFilter = &filter_39_39_7[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_39_39_8";
+    theFilter = &filter_39_39_8[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_39_39_9";
+    theFilter = &filter_39_39_9[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_39_39_10";
+    theFilter = &filter_39_39_10[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_39_39_11";
+    theFilter = &filter_39_39_11[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    filterName = "filter_39_39_12";
+    theFilter = &filter_39_39_12[0];
+    filters.insert(t_filterpair(filterName, theFilter));
+    */
     return filters;
     
 }

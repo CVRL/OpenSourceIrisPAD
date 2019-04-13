@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include "hdf5.h"
 #include "BSIFFilter.hpp"
 
 
@@ -18,7 +19,6 @@ class featureExtractor
 public:
     featureExtractor(int bits, std::vector<std::string>& inFilenames, std::string& segmentationType);
     
-    void extract(std::string& outDir, std::string& outName, std::string& imageDir);
     
     void extract(std::string& outDir, std::string& outName, std::string& imageDir, int filtersize);
     

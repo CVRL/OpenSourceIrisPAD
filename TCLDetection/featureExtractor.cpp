@@ -9,7 +9,7 @@
 
 using namespace std;
 
-featureExtractor::featureExtractor(int bits, vector<string>& inFilenames, std::string& segmentationType) : bitsize(bits), filenames(inFilenames), segmentation(segmentationType){}
+featureExtractor::featureExtractor(int bits, vector<string>& inFilenames, std::string& segmentationType) : bitsize(bits), segmentation(segmentationType), filenames(inFilenames) {}
 
 void featureExtractor::extract(std::string& outDir, std::string& outName, std::string& imageDir, int filtersize)
 {
@@ -26,142 +26,67 @@ void featureExtractor::extract(std::string& outDir, std::string& outName, std::s
     }
 }
 
-void featureExtractor::extract(std::string& outDir, std::string& outName, std::string& imageDir)
-{
-    
-    outputLocation = outDir + outName;
-    imageLocation = imageDir;
-    
-    // Filter with 8 different sizes
-    cout << "Filtering with size 3..." << endl;
-    try
-    {
-        filter(3);
-    }
-    catch (runtime_error& e)
-    {
-        throw e;
-    }
-    
-    
-    cout << "Filtering with size 5..." << endl;
-    try
-    {
-        filter(5);
-    }
-    catch (runtime_error& e)
-    {
-        throw e;
-    }
-    
-    
-    cout << "Filtering with size 7..." << endl;
-    try
-    {
-        filter(7);
-    }
-    catch (runtime_error& e)
-    {
-        throw e;
-    }
-    
-    
-    cout << "Filtering with size 9..." << endl;
-    try
-    {
-        filter(9);
-    }
-    catch (runtime_error& e)
-    {
-        throw e;
-    }
-    
-    
-    cout << "Filtering with size 11..." << endl;
-    try
-    {
-        filter(11);
-    }
-    catch (runtime_error& e)
-    {
-        throw e;
-    }
-    
-    
-    cout << "Filtering with size 13..." << endl;
-    try
-    {
-        filter(13);
-    }
-    catch (runtime_error& e)
-    {
-        throw e;
-    }
-    
-    
-    cout << "Filtering with size 15..." << endl;
-    try
-    {
-        filter(15);
-    }
-    catch (runtime_error& e)
-    {
-        throw e;
-    }
-    
-    
-    cout << "Filtering with size 17..." << endl;
-    try
-    {
-        filter(17);
-    }
-    catch (runtime_error& e)
-    {
-        throw e;
-    }
-    
-    
-    cout << "Done generating features." << endl;
-}
 
 
 
 
 
-// Function produces features for filter size and its double (through downsampling)
+// Function produces features for filter size, bit size
 void featureExtractor::filter(int filterSize)
 {
+    std::stringstream nameStream;
+    nameStream << outputLocation << "_filter_" << filterSize << "_" << filterSize << "_" << bitsize << ".hdf5";
+    string filtername = nameStream.str();
+    
+    // Open files
+    //ofstream histOut;
+    //histOut.open(filtername, ios::out | ios::trunc);
+    
+    // HDF5
+    hid_t       file_id;   /* file identifier */
+    herr_t      status;
+    
+    const char* new_filename = filtername.c_str();
+    /* Create a new file using default properties. */
+    file_id = H5Fcreate(new_filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    
+    
+    
+    bool downsample = false;
+    if ((filterSize % 2) == 0)
+    {
+        downsample = true;
+        filterSize /= 2;
+    }
     
     // Load filter
     BSIFFilter currentFilter;
     currentFilter.loadFilter(filterSize, bitsize);
     
-    // Open files
-    ofstream histOut;
-    histOut.open((outputLocation + "_" + currentFilter.filtername + ".csv"), ios::out | ios::trunc);
-    
-    ofstream downHistOut;
-    downHistOut.open((outputLocation + "_" + currentFilter.downFiltername + ".csv"), ios::out | ios::trunc);
-    
     // Initialize histogram
-    int histsize = pow(2,bitsize) + 1;
+    int histsize = pow(2,bitsize) + 1; // add one because 0 position will not be used (need 257 slots because use positions 1-256)
     std::vector<int> histogram(histsize, 0);
+    
+    // create dataspace
+    hid_t       dataset_id, dataspace_id;  /* identifiers */
+    hsize_t     dims[1];
+    dims[0] = histsize - 1;
+    
+    
+    
+    dataspace_id = H5Screate_simple(1, dims, NULL);
     
     // Loop through images
     for (int i = 0; i < (int)filenames.size(); i++)
     {
         
-        /*
-        // Display progress
-        std::cout << "Processing sample " << (i + 1) << " out of " << filenames.size() << endl;
-        cout << filenames[i] << endl;
-        */
         
         // Load image from file
         cv::Mat image = cv::imread((imageLocation + filenames[i]), 0);
         
-        
-        
+        // create dataset
+        dataset_id = H5Dcreate2(file_id, filenames[i].c_str(), H5T_STD_I64LE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         
         if ( image.empty() )
         {
@@ -184,32 +109,43 @@ void featureExtractor::filter(int filterSize)
         }
         
         // Save image information
-        histOut << filenames[i] << ",";
-        downHistOut << filenames[i] << ",";
+        //histOut << filenames[i] << ",";
+        //downHistOut << filenames[i] << ",";
         
-        // Calculate histograms for full sized image
-        currentFilter.generateHistogram(imageToUse, histogram);
-        
+        if (downsample)
+        {
+            // Downsample image by 50% in either direction
+            cv::Mat downImage;
+            cv::pyrDown(imageToUse, downImage, cv::Size(imageToUse.cols / 2, imageToUse.rows / 2));
+            
+            // Run filter on downsampled image (simulates doubling of BSIF kernel size)
+            currentFilter.generateHistogram(downImage, histogram);
+            
+        }
+        else
+        {
+            // Calculate histograms for full sized image
+            currentFilter.generateHistogram(imageToUse, histogram);
+            
+        }
         // Ignore 0 position in histogram (image initialized to 1s in BSIFfilter so no 0s will be present)
         // Only go to (histsize - 1) to output endl after last
-        for (int i = 1; i < (histsize - 1); i++) histOut << histogram[i] << ",";
+        //for (int i = 1; i < (histsize - 1); i++) histOut << histogram[i] << ", ";
         // Need to output endl after last column instead of ","
-        histOut << histogram[histsize - 1] << std::endl;
+        //histOut << histogram[histsize - 1] << std::endl;
+        
+        int *array_from_vector = &histogram[1]; // skip zero slot
+        status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, array_from_vector);
+        
         std::fill(histogram.begin(), histogram.end(), 0);
         
-        // Downsample image by 50% in either direction
-        cv::Mat downImage;
-        cv::pyrDown(imageToUse, downImage, cv::Size(imageToUse.cols / 2, imageToUse.rows / 2));
-        
-        // Run filter on downsampled image (simulates doubling of BSIF kernel size)
-        currentFilter.generateHistogram(downImage, histogram);
-        for (int i = 1; i < (histsize - 1); i++) downHistOut << histogram[i] << ", ";
-        // Need to output endl after last column instead of ","
-        downHistOut << histogram[histsize - 1] << std::endl;
-        std::fill(histogram.begin(), histogram.end(), 0);
+        status = H5Dclose(dataset_id);
     }
 
     // Close files
-    histOut.close();
-    downHistOut.close();
+    //histOut.close();
+    /* Terminate access to the data space. */
+    status = H5Sclose(dataspace_id);
+    /* Terminate access to the file. */
+    status = H5Fclose(file_id);
 }

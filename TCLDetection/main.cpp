@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
     if (argc != 2)
     {
         cout << "Usage: tclDetect config.ini" << endl;
-        cout << "Please provide configuration file" << endl;
+        cout << "Please provide configuration filename" << endl;
         return 0;
     }
     

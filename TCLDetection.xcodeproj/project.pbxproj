@@ -268,8 +268,14 @@
 				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 39TFK3MY8L;
-				"HEADER_SEARCH_PATHS[arch=*]" = /usr/local/Cellar/opencv/3.4.1_6/include;
-				"LIBRARY_SEARCH_PATHS[arch=*]" = /usr/local/Cellar/opencv/3.4.1_6/lib;
+				"HEADER_SEARCH_PATHS[arch=*]" = (
+					/usr/local/Cellar/opencv/3.4.1_6/include,
+					/usr/local/Cellar/hdf5/1.10.4/include,
+				);
+				"LIBRARY_SEARCH_PATHS[arch=*]" = (
+					/usr/local/Cellar/opencv/3.4.1_6/lib,
+					/usr/local/Cellar/hdf5/1.10.4/lib,
+				);
 				"OTHER_LDFLAGS[arch=*]" = (
 					"-I/usr/local/Cellar/opencv/3.4.1_6/include/opencv",
 					"-I/usr/local/Cellar/opencv/3.4.1_6/include",
@@ -317,6 +323,15 @@
 					"-lopencv_xphoto",
 					"-lopencv_imgproc",
 					"-lopencv_core",
+					"-L/usr/local/opt/szip/lib",
+					"-I/usr/local/opt/szip/include",
+					"-L/usr/local/Cellar/hdf5/1.10.4/lib",
+					/usr/local/Cellar/hdf5/1.10.4/lib/libhdf5_hl.a,
+					/usr/local/Cellar/hdf5/1.10.4/lib/libhdf5.a,
+					"-lsz",
+					"-lz",
+					"-ldl",
+					"-lm",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
