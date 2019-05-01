@@ -3,6 +3,8 @@
 
 This repo contains the open-source implementation of iris PAD based on BSIF and a fusion of multiple classifiers, and is based on Jay Doyle's paper: "Robust Detection of Textured Contact Lenses in Iris Recognition Using BSIF", IEEE Access, 2015 (https://ieeexplore.ieee.org/document/7264974/).
 
+The paper presenting this implementation is available at: https://arxiv.org/abs/1809.10172
+
 ## Updates
 
 - Added random forest and multilayer perceptron models
