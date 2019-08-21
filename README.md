@@ -73,3 +73,15 @@ To use this feature, you must specify:
 - The directory of the saved models
 
 The results of the test will be printed to the console.
+
+## Selecting an Ensemble for Cross-Database Use
+
+One of the goals of this software is to provide a method to train models that perform well in cross-database tests. Therefore, the following procedure has been devised for the selection of an ensemble that can perform well in cross-database testing, as shown in the paper associated with this software. These steps involve 3 datasets: one for training, one for validation, and one for testing.
+1. Train a models (up to 360 total if all bit sizes and scales are used) on a single dataset
+2. Test the performance of these models *individually* on a second dataset
+3. Rank the models by their performance from 2.
+4. Add the models to an ensemble (majority voting in this software) one-by-one and test the performance of this ensemble:
+- Best model
+- Best model + second best
+- etc.
+5. Determine the ensemble that produces the best results and select this ensemble for cross-database testing
