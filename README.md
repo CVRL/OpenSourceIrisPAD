@@ -13,13 +13,15 @@ The paper presenting this implementation is available at: https://arxiv.org/abs/
 
 ## Requirements
 
-This iris PAD implementation is based on [OpenCV 3.4.1](https://opencv.org) and [HDF5 1.10.4](https://www.hdfgroup.org).
+This iris PAD implementation is based on [OpenCV 3.4.1](https://opencv.org) and [HDF5 1.10.4](https://www.hdfgroup.org). These libraries must be installed in order to run the iris PAD software. Various tutorials can be found online to install these libraries on any operating system. For testing, these libraries were installed with [Homebrew](https://brew.sh) on MacOS.
 
 ## Usage
 
-TCL Detection comes with three built in capabilities: BSIF feature extraction, model training, and performance testing.  To select capabilities and set various parameters, edit the settings in the included configuration file (configuration.ini). To compile the program, use make.
+TCL Detection comes with three built in capabilities: BSIF feature extraction, model training, and performance testing.  To select capabilities and set various parameters, edit the settings in the included configuration file (configuration.ini). To compile the program, use make. 
 
-For the Python implementation, simply run the manager.py file to start the program.
+The makefile includes flags for both OpenCV and HDF5. For OpenCV, [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/) is used to determine these flags. If you do not have pkg-config, either install it or replace it with explicit OpenCV flags. For HDF5, the flags listed reference the Homebrew installation of HDF5. If this differs from your installation of HDF5, the file paths may need to be altered for compilation to occur correctly.
+
+For the Python implementation, simply run the manager.py file to start the program. THe Python version depends on [NumPy](https://www.numpy.org), [h5py](https://www.h5py.org), and OpenCV. All three of these can be installed using Python's package manager (pip).
 
 
 ### BSIF Feature Extraction
