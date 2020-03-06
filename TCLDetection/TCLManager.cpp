@@ -22,6 +22,7 @@ TCLManager::TCLManager(void)
     mapBool["Extract features"] = &extractFeatures;
     mapBool["Train model"] = &trainModel;
     mapBool["Test images"] = &testImages;
+    mapBool["Test list has base truth"] = &hasBaseTruth;
     mapBool["Majority voting"] = &majorityVoting;
     mapString["Segmentation"] = &segmentationType;
     mapString["Model type"] = &modelString;
@@ -37,6 +38,8 @@ TCLManager::TCLManager(void)
     mapString["Feature extraction destination file"] = &outputExtractionFilename;
     mapString["Feature extraction destination directory"] = &outputExtractionDir;
     mapString["Model directory"] = &modelOutputDir;
+    mapString["Classification filename"] = &classificationFilename;
+    mapString["Classification file directory"] = &classificationDirectory;
 
 
     // Initialize
@@ -164,6 +167,10 @@ void TCLManager::showConfig(void)
     {
         cout << "| Test images | ";
     }
+    if (hasBaseTruth)
+    {
+        cout << endl << "- True classifications included for test set";
+    }
     cout << endl;
 
 
@@ -246,15 +253,6 @@ void TCLManager::run(void)
 
         std::cout << "Extracting features..." << std::endl;
 
-        try
-        {
-            loadSets();
-        }
-        catch (runtime_error& e)
-        {
-            throw e;
-        }
-        
         // Concatenate lists of files
         std::vector<std::string> extractionFilenames;
         extractionFilenames.insert(extractionFilenames.end(), trainingSet.begin(), trainingSet.end());
@@ -381,122 +379,105 @@ void TCLManager::run(void)
     {
         std::cout << "Testing images..." << endl << endl;
         
-        if (majorityVoting)
+        // Mat objects for testing data
+        cv::Mat featuresTest;
+        cv::Mat classesTest;
+        
+        // Results vector
+        vector<cv::Mat> results;
+        
+        // determine individual results
+        for (int i = 0; i < (int)modelSizes.size(); i++)
         {
-            // Test performance (majority voting)
-            
-            // Mat objects for testing data
-            cv::Mat featuresTest;
-            cv::Mat classesTest;
-            
-            // Results vector
-            vector<cv::Mat> results;
-
-            // determine individual results
-            for (int i = 0; i < (int)modelSizes.size(); i++)
+            // Check if file exists
+            ifstream nextFile(modelOutputDir + generateFilename(i));
+            Ptr<StatModel> currentModel;
+            if (nextFile.good())
             {
-                // Check if file exists
-                ifstream nextFile(modelOutputDir + generateFilename(i));
-                Ptr<StatModel> currentModel;
-                if (nextFile.good())
+                if (modelTypes[i] == "svm")
                 {
-                    if (modelTypes[i] == "svm")
-                    {
-                        // Load SVM
-                        currentModel = Algorithm::load<SVM>(modelOutputDir + generateFilename(i));
-                    }
-                    else if (modelTypes[i] == "rf")
-                    {
-                        currentModel = Algorithm::load<RTrees>(modelOutputDir + generateFilename(i));
-                    }
-                    else if (modelTypes[i] == "mp")
-                    {
-                        currentModel = Algorithm::load<ANN_MLP>(modelOutputDir + generateFilename(i));
-                    }
-                    
+                    // Load SVM
+                    currentModel = Algorithm::load<SVM>(modelOutputDir + generateFilename(i));
                 }
-                else
+                else if (modelTypes[i] == "rf")
                 {
-                    throw runtime_error("Error: Model \"" + generateFilename(i) + "\" not found.");
+                    currentModel = Algorithm::load<RTrees>(modelOutputDir + generateFilename(i));
                 }
-                
-                // Load testing features
-                try
+                else if (modelTypes[i] == "mp")
                 {
-                    loadFeatures(featuresTest, classesTest, modelSizes[i], TEST, bitSizes[i]);
-                }
-                catch (runtime_error& e)
-                {
-                    throw e;
-                }
-                
-                
-                if (modelTypes[i] == "mp")
-                {
-                    // New mat for results
-                    cv::Mat individualResults(classesTest.rows, 2, CV_32FC1);
-                    
-                    // Predict using model
-                    currentModel->predict(featuresTest, individualResults);
-                    
-                    // Convert back to 0 or 1
-                    for (int j = 0; j < classesTest.rows; j++)
-                    {
-                        if ((individualResults.at<float>(j,0) > 0.8) && (individualResults.at<float>(j,1) < -0.8))
-                        {
-                            individualResults.at<float>(j,0) = 1;
-                        }
-                        else if ((individualResults.at<float>(j,0) < -0.8) && (individualResults.at<float>(j,1) > 0.8))
-                        {
-                            individualResults.at<float>(j,0) = 0;
-                        }
-                        else
-                        {
-                            // If uncertain, assign randomly
-                            individualResults.at<float>(j,0) = (rand() % 2);
-                        }
-                    }
-                    
-                    // Add results to results vector
-                    results.push_back(individualResults);
-                }
-                else
-                {
-                    // New Mat for results
-                    cv::Mat individualResults(classesTest.rows, classesTest.cols, CV_32FC1);
-                    
-                    // Predict using model
-                    currentModel->predict(featuresTest, individualResults);
-                    
-                    // Add results to results vector
-                    results.push_back(individualResults);
+                    currentModel = Algorithm::load<ANN_MLP>(modelOutputDir + generateFilename(i));
                 }
                 
             }
+            else
+            {
+                throw runtime_error("Error: Model \"" + generateFilename(i) + "\" not found.");
+            }
             
+            // Load testing features
+            try
+            {
+                loadFeatures(featuresTest, classesTest, modelSizes[i], TEST, bitSizes[i]);
+            }
+            catch (runtime_error& e)
+            {
+                throw e;
+            }
+            
+            
+            if (modelTypes[i] == "mp")
+            {
+                // New mat for results
+                cv::Mat individualResults(classesTest.rows, 2, CV_32FC1);
+                
+                // Predict using model
+                currentModel->predict(featuresTest, individualResults);
+                
+                // Convert back to 0 or 1
+                for (int j = 0; j < classesTest.rows; j++)
+                {
+                    if ((individualResults.at<float>(j,0) > 0.8) && (individualResults.at<float>(j,1) < -0.8))
+                    {
+                        individualResults.at<float>(j,0) = 1;
+                    }
+                    else if ((individualResults.at<float>(j,0) < -0.8) && (individualResults.at<float>(j,1) > 0.8))
+                    {
+                        individualResults.at<float>(j,0) = 0;
+                    }
+                    else
+                    {
+                        // If uncertain, assign randomly
+                        individualResults.at<float>(j,0) = (rand() % 2);
+                    }
+                }
+                
+                // Add results to results vector
+                results.push_back(individualResults);
+            }
+            else
+            {
+                // New Mat for results
+                cv::Mat individualResults(classesTest.rows, classesTest.cols, CV_32FC1);
+                
+                // Predict using model
+                currentModel->predict(featuresTest, individualResults);
+                
+                // Add results to results vector
+                results.push_back(individualResults);
+            }
+            
+        }
+        
+        // open file to output classifications
+        ofstream classifications;
+        classifications.open(classificationDirectory + classificationFilename);
+        
+        if (majorityVoting) {
             // Perform majority voting
             vector<int> overallResult;
             
-            int numIncorrect = 0;
-            float apcer = 0;
-            float bpcer = 0;
-            int num_bonafide = 0;
-            int num_attack = 0;
             
-            for (int j = 0; j < classesTest.rows; j++)
-            {
-                if (classesTest.at<int>(j,0) == 0)
-                {
-                    num_bonafide++;
-                }
-                else
-                {
-                    num_attack++;
-                }
-            }
-            
-            
-            for (int i = 0; i < (int)testingClass.size(); i++)
+            for (int i = 0; i < (int)testingSet.size(); i++)
             {
                 // Variables for majority voting division
                 int inFavor = 0;
@@ -527,184 +508,102 @@ void TCLManager::run(void)
                     // In the case of a tie, choose randomly (0 or 1)
                     overallResult.push_back((rand() % 2));
                 }
-                
-                // Determine if incorrect
-                if (overallResult[i] != classesTest.at<int>(i,0))
-                {
-                    numIncorrect++;
-                    if (classesTest.at<int>(i,0) == 1)
-                    {
-                        // positive misidentified as negative
-                        apcer++;
-                    }
-                    else
-                    {
-                        // negative misidentified as positive
-                        bpcer++;
-                    }
-                }
             }
+            // Add the result to the output file
+            addToClassificationFile(overallResult, classifications);
             
-            // Output accuracy
-            
-            float ccr = 100 - ((float)numIncorrect / classesTest.rows) * 100;
-            
-            apcer = apcer / (float)num_attack * 100;
-            bpcer = bpcer / (float)num_bonafide * 100;
-            
-            cout << "Number of models in the ensemble: " << (int)modelSizes.size() << endl;
-            cout << "CCR: " << ccr << endl;
-            cout << "APCER: " << apcer << endl;
-            cout << "BPCER: " << bpcer << endl << endl;
-        }
-        else
-        {
-            // Use each model separately
-            // Mat objects for testing data
-            cv::Mat featuresTest;
-            cv::Mat classesTest;
-            
-            
-            for (int i = 0; i < (int)modelSizes.size(); i++)
-            {
-                // Check if file exists
-                ifstream nextFile(modelOutputDir + generateFilename(i));
-                Ptr<StatModel> currentModel;
-                if (nextFile.good())
-                {
-                    if (modelTypes[i] == "svm")
-                    {
-                        // Load SVM
-                        currentModel = Algorithm::load<SVM>(modelOutputDir + generateFilename(i));
-                    }
-                    else if (modelTypes[i] == "rf")
-                    {
-                        currentModel = Algorithm::load<RTrees>(modelOutputDir + generateFilename(i));
-                    }
-                    else if (modelTypes[i] == "mp")
-                    {
-                        currentModel = Algorithm::load<ANN_MLP>(modelOutputDir + generateFilename(i));
-                    }
-                    
-                }
-                else
-                {
-                    throw runtime_error("Error: Model \"" + generateFilename(i) + "\" not found.");
-                }
-                
-            
-                // Load testing features
-                try
-                {
-                    loadFeatures(featuresTest, classesTest, modelSizes[i], TEST, bitSizes[i]);
-                }
-                catch (runtime_error& e)
-                {
-                    throw e;
-                }
-
-                int numIncorrect = 0;
-                float apcer = 0;
-                float bpcer = 0;
-                int num_bonafide = 0;
-                int num_attack = 0;
-                
-                for (int j = 0; j < classesTest.rows; j++)
-                {
-                    if (classesTest.at<int>(j,0) == 0)
-                    {
-                        num_bonafide++;
-                    }
-                    else
-                    {
-                        num_attack++;
-                    }
-                }
-
-                if (modelTypes[i] == "mp")
-                {
-                    // New mat for results
-                    cv::Mat individualResults(classesTest.rows, 2, CV_32FC1);
-
-                    // Predict using model
-                    currentModel->predict(featuresTest, individualResults);
-                    
-                    // Determine number incorrect
-                    for (int j = 0; j < classesTest.rows; j++)
-                    {
-                        if ((individualResults.at<float>(j,0) > 0.8) && (individualResults.at<float>(j,1) < -0.8))
-                        {
-                            if (classesTest.at<int>(j,0) == 0)
-                            {
-                                numIncorrect++;
-                                // bona fide misidentified as attack
-                                bpcer++;
-                            }
-                        }
-                        else if ((individualResults.at<float>(j,0) < -0.8) && (individualResults.at<float>(j,1) > 0.8))
-                        {
-                            if (classesTest.at<int>(j,0) == 1)
-                            {
-                                numIncorrect++;
-                                // attack misidentified as bona fide
-                                apcer++;
-                            }
-                        }
-                        else
-                        {
-                            // If uncertain, add as well
-                            numIncorrect++;
-                        }
-
-                    }
-                }
-                else
-                {
-                    // New Mat for results
-                    cv::Mat individualResults(classesTest.rows, classesTest.cols, CV_32FC1);
-
-                    // Predict using model
-                    currentModel->predict(featuresTest, individualResults);
-                    
-                    // Determine number incorrect
-                    for (int j = 0; j < classesTest.rows; j++)
-                    {
-                        if (individualResults.at<float>(j,0) != classesTest.at<int>(j,0))
-                        {
-                            numIncorrect++;
-                            if (classesTest.at<int>(j,0) == 1)
-                            {
-                                // attack misidentified as bona fide
-                                apcer++;
-                            }
-                            else
-                            {
-                                // bona fide misidentified as attack
-                                bpcer++;
-                            }
-                        }
-                    }
-                }
-
-
-                // Output accuracy
-                float ccr = 100 - ((float)numIncorrect / classesTest.rows) * 100;
-                apcer = apcer / (float)num_attack * 100;
-                bpcer = bpcer / (float)num_bonafide * 100;
-                
-                cout << "Model: " << generateFilename(i) << endl;
-                cout << "CCR: " << ccr << endl;
-                cout << "APCER: " << apcer << endl;
-                cout << "BPCER: " << bpcer << endl << endl;
-
+            // gets truth and compares to the result we saw here
+            if (hasBaseTruth) {
+                cout << "Number of models in the ensemble: " << modelSizes.size() << endl;
+                outputStats(classesTest, overallResult);
             }
         }
+        else {
+            vector<int> overallResult;
+            // loop through models
+            for (int i = 0; i < modelSizes.size(); ++i) {
+                // convert to vector
+                overallResult.clear();
+                for (int j = 0; j < testingClass.size(); ++j) {
+                    overallResult.emplace_back(results[i].at<float>(j,0));
+                }
+                // add result to output file
+                addToClassificationFile(overallResult, classifications);
+                classifications << "------------------" << endl;
+                
+                // get stats
+                if (hasBaseTruth) {
+                    cout << "Model: " << generateFilename(i) << endl;
+                    outputStats(classesTest, overallResult);
+                }
+            }
+        }
+        classifications.close();
     }
 }
 
 
 
+// Determines the number correct/incorrect if we have the base truth
+// outputs to console
+void TCLManager::outputStats(cv::Mat classesTest, vector<int>& result)
+{
+    int numIncorrect = 0;
+    float apcer = 0;
+    float bpcer = 0;
+    int num_bonafide = 0;
+    int num_attack = 0;
+    
+    // load the base truth
+    for (int j = 0; j < classesTest.rows; j++)
+    {
+        if (classesTest.at<int>(j,0) == 0)
+        {
+            num_bonafide++;
+        }
+        else
+        {
+            num_attack++;
+        }
+    }
+    
+    // check against the model results
+    for (int i = 0; i < testingClass.size(); ++i) {
+        // Determine if incorrect
+        if (result[i] != classesTest.at<int>(i,0))
+        {
+            numIncorrect++;
+            if (classesTest.at<int>(i,0) == 1)
+            {
+                // positive misidentified as negative
+                apcer++;
+            }
+            else
+            {
+                // negative misidentified as positive
+                bpcer++;
+            }
+        }
+    }
+    
+    // Output accuracy
+    float ccr = 100 - ((float)numIncorrect / classesTest.rows) * 100;
+    
+    apcer = apcer / (float)num_attack * 100;
+    bpcer = bpcer / (float)num_bonafide * 100;
+    
+    cout << "CCR: " << ccr << endl;
+    cout << "APCER: " << apcer << endl;
+    cout << "BPCER: " << bpcer << endl << endl;
+}
 
+// logs a list of filenames and the classifications determined by the selected models or majority voting combination of them
+void TCLManager::addToClassificationFile(vector<int>& result, ofstream& file) {
+    for (int i = 0; i < testingSet.size(); ++i) {
+        // add each result to the file
+        file << testingSet[i] << "," << result[i] << endl;
+    }
+}
 
 // Initializes all parameters
 void TCLManager::initConfig(void)
@@ -792,7 +691,7 @@ void TCLManager::loadSets(void)
         {
             location = currentName.find(",");
             testingSet.push_back(currentName.substr(0, location));
-            testingClass.push_back(stoi(currentName.substr((location + 1))));
+            if (hasBaseTruth) testingClass.push_back(stoi(currentName.substr((location + 1))));
         }
         test.close();
 
@@ -902,7 +801,10 @@ void TCLManager::loadFeatures(cv::Mat& outputFeatures, cv::Mat& outputLabels, in
         
         
         // Load class into Mat
-        outputLabels.at<int>(i,0) = (*classSet)[i];
+        // don't load labels for the test set if it doesn't have any
+        if (hasBaseTruth || (setType == TRAIN)) {
+            outputLabels.at<int>(i,0) = (*classSet)[i];
+        }
 
     }
     

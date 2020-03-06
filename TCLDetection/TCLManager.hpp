@@ -32,6 +32,7 @@ private:
     bool extractFeatures;
     bool trainModel;
     bool testImages;
+    bool hasBaseTruth;
     bool majorityVoting;
     std::string segmentationType;
     std::string modelString;
@@ -53,6 +54,8 @@ private:
     std::string outputExtractionFilename;
     std::string outputExtractionDir;
     std::string modelOutputDir;
+    std::string classificationFilename;
+    std::string classificationDirectory;
     
     // Maps to associate a string (config file) to a variable (pointer)
     std::map<std::string,bool*> mapBool;
@@ -68,6 +71,10 @@ private:
     std::vector<int> testingClass;
     
     void initConfig(void);
+    
+    void outputStats(cv::Mat classesTest, std::vector<int>& result);
+    
+    void addToClassificationFile(std::vector<int>& result, std::ofstream& file);
     
     void loadSets(void);
     
