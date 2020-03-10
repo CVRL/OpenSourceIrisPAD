@@ -524,7 +524,7 @@ void TCLManager::run(void)
             for (int i = 0; i < modelSizes.size(); ++i) {
                 // convert to vector
                 overallResult.clear();
-                for (int j = 0; j < testingClass.size(); ++j) {
+                for (int j = 0; j < testingSet.size(); ++j) {
                     overallResult.emplace_back(results[i].at<float>(j,0));
                 }
                 // add result to output file
