@@ -6,7 +6,8 @@
 #include "BSIFFilter.hpp"
 
 #include <Python.h> //include python api
-#include "/usr/local/Cellar/numpy/1.15.4/lib/python2.7/site-packages/numpy/core/include/numpy/arrayobject.h"
+//#include "/usr/local/Cellar/numpy/1.15.4/lib/python2.7/site-packages/numpy/core/include/numpy/arrayobject.h"
+#include "/usr/include/numpy/arrayobject.h"
 
 static PyObject *
 loadFilter(PyObject *self, PyObject *args)
@@ -28,7 +29,7 @@ loadFilter(PyObject *self, PyObject *args)
     int nd = 1;
     npy_intp dims[] = {size * size * bits};
 
-    array = PyArray_SimpleNewFromData(nd, dims, PyArray_DOUBLE, (void *)myFilter);
+    array = PyArray_SimpleNewFromData(nd, dims, NPY_DOUBLE, (void *)myFilter);
 
     return array;
 };
@@ -39,10 +40,17 @@ static PyMethodDef BSIFMethods[] = {
      { NULL, NULL, 0, NULL }
 };
 
-PyMODINIT_FUNC
-initbsif(void)
-{
-    (void) Py_InitModule("bsif", BSIFMethods);
-    import_array();
-}
+static struct PyModuleDef BSIFDefinition = {
+    PyModuleDef_HEAD_INIT,
+    "BSIF",
+    "A Python module that load a bsif filter",
+    -1,
+    BSIFMethods
+};
 
+PyMODINIT_FUNC
+PyInit_bsif(void)
+{
+    import_array();
+    return PyModule_Create(&BSIFDefinition);
+}
