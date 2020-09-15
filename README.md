@@ -1,6 +1,5 @@
 # OpenSourceIrisPAD (v2 - 13 April 2019)
 
-
 This repo contains the open-source implementation of iris PAD based on BSIF and a fusion of multiple classifiers, and is based on Jay Doyle's paper: "Robust Detection of Textured Contact Lenses in Iris Recognition Using BSIF", IEEE Access, 2015 (https://ieeexplore.ieee.org/document/7264974/).
 
 The paper presenting this implementation is available at: https://arxiv.org/abs/1809.10172
@@ -17,7 +16,7 @@ This iris PAD implementation is based on [OpenCV 3.4.1](https://opencv.org) and 
 
 ## Usage
 
-TCL Detection comes with three built in capabilities: BSIF feature extraction, model training, and performance testing.  To select capabilities and set various parameters, edit the settings in the included configuration file (configuration.ini). To compile the program, use make. 
+TCL Detection comes with three built in capabilities: BSIF feature extraction, model training, and performance testing.  To select capabilities and set various parameters, edit the settings in the included configuration file (configuration.ini). To compile the program, use make.
 
 The makefile includes flags for both OpenCV and HDF5. For OpenCV, [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/) is used to determine these flags. If you do not have pkg-config, either install it or replace it with explicit OpenCV flags. For HDF5, the flags listed reference the Homebrew installation of HDF5. If this differs from your installation of HDF5, the file paths may need to be altered for compilation to occur correctly.
 
@@ -85,3 +84,21 @@ One of the goals of this software is to provide a method to train models that pe
 - Best model + second best
 - etc.
 5. Determine the ensemble that produces the best results and select this ensemble for cross-database testing
+
+---
+
+## Installing dependencies
+
+### Environment
+
+```sh
+conda env create -f environment.yaml
+```
+
+### BSIF
+
+```sh
+conda activate osipad
+cd python/BSIF_C
+python setup.py install
+```
