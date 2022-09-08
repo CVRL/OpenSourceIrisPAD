@@ -1,8 +1,50 @@
 # OpenSourceIrisPAD (v2 - 13 April 2019)
 
-This repo contains the open-source implementation of iris PAD based on BSIF and a fusion of multiple classifiers, and is based on Jay Doyle's paper: "Robust Detection of Textured Contact Lenses in Iris Recognition Using BSIF", IEEE Access, 2015 (https://ieeexplore.ieee.org/document/7264974/).
+This repo contains the open-source implementation of iris PAD based on BSIF and a fusion of multiple classifiers, and is based on Jay Doyle's paper: ["Robust Detection of Textured Contact Lenses in Iris Recognition Using BSIF", IEEE Access, 2015](https://ieeexplore.ieee.org/document/7264974/).
 
-The paper presenting this implementation is available at: https://arxiv.org/abs/1809.10172
+The paper presenting this implementation is available in [arXiv](https://arxiv.org/abs/1809.10172).
+
+## Linux installation
+
+### Environment
+
+```bash
+conda env create -f environment.yaml
+```
+
+### BSIF
+
+```bash
+conda activate osipad
+cd python/BSIF_C
+
+# compile
+python setup.py install
+# >> in case arrayobject.h is not found, see below
+
+# copy the .so file generated,
+SO_FILE=$(find . -type f | grep .so | head -n 1)
+echo "Generated file: $SO_FILE"
+
+# still in python/BSIF_C, replace the older one that is in the parent directory
+cp "$SO_FILE" ../bsif.so
+```
+
+Now `import bsif` should work in Python, as long as `bsif.so` is in the same directory.
+
+### Fix for `arrayobject.h` not found
+
+Get the correct path and replace it in the source code:
+
+```bash
+locate arrayobject.h
+# copy the path
+
+# edit the file replacing it:
+nano python/BSIF_C/bsif_wrapper.cpp
+```
+
+---
 
 ## Updates
 
@@ -28,6 +70,7 @@ For the Python implementation, simply run the manager.py file to start the progr
 If feature extraction is selected, the filenames specified in the training and testing csv files will be used as images for [BSIF](http://www.ee.oulu.fi/~jkannala/bsif/bsif.html) feature extraction.  This process involves filtering with previously defined BSIF filters and then producing a histogram characterizing the image in terms of these filters. For example, if 8 filters are used, as specified in this implementation, each pixel in the image will have an 8 bit integer where each binary position represents the pixel's response to a specific filter.  The histogram has counts for the number of pixels with each value, 1-256.
 
 To use this feature, you must specify:
+
 - The image directory
 - The directory and filenames for the lists with the image filenames and classifications
 - The desired output directory
@@ -43,6 +86,7 @@ The output file format is an HDF5 file with histograms indexed by the name of th
 If model training is selected, the desired model type will be created and trained on the data specified in the training set file. For SVM, the trainAuto function in OpenCV is used to select optimal parameters for each model.  For random forest and multilayer perceptron, a custom training function has been implemented to mimic the functionality of the SVM trainAuto function: 10 fold cross validation is used to select the best parameters for each model. Currently, the trainAuto functionality for random forest and multilayer perceptron is only available in the C++ version. In order to use the training functionality, the required BSIF features must already be extracted.
 
 To use this feature, you must specify:
+
 - The directory and filenames for the lists with the image filenames and classifications (only training required)
 - The location and filename of the features that will be used for training (must run feature extraction prior to this step)
 - The training sizes to use (for this, you may specify any of the 16 sizes as a comma separated list)
@@ -53,6 +97,7 @@ To use this feature, you must specify:
 The training process will produce xml files for each model trained, allowing the models to be loaded in the future.
 
 In this release, 360 (120 feature sets * 3 model types) models have been included that have been trained on the NDCLD15 database, which includes 5 brands of textured contact lenses (2500 images) and 4800 clear lens or no lens images. The following brands are represented in the database:
+
 - CIBA Vision
 - United Contact Lenses
 - Clearlab
@@ -66,6 +111,7 @@ To access these models, go to https://notredame.box.com/v/OpenSourceIrisPADModel
 If image testing is selected, the models specified in the configuration file will be used to classify the images in the testing set.  You may choose to use majority voting to group the ensemble of models, or test each model individually.
 
 To use this feature, you must specify:
+
 - The directory and filenames for the lists with the image filenames and classifications (only testing required)
 - The location and filename of the features that will be used for testing (must run feature extraction prior to this step)
 - The BSIF sizes, bitsizes, and model types to use in testing (the models must already be trained and saved)
@@ -76,29 +122,12 @@ The results of the test will be printed to the console.
 ## Selecting an Ensemble for Cross-Database Use
 
 One of the goals of this software is to provide a method to train models that perform well in cross-database tests. Therefore, the following procedure has been devised for the selection of an ensemble that can perform well in cross-database testing, as shown in the paper associated with this software. These steps involve 3 datasets: one for training, one for validation, and one for testing.
+
 1. Train a models (up to 360 total if all bit sizes and scales are used) on a single dataset
 2. Test the performance of these models *individually* on a second dataset
 3. Rank the models by their performance from 2.
 4. Add the models to an ensemble (majority voting in this software) one-by-one and test the performance of this ensemble:
-- Best model
-- Best model + second best
-- etc.
+    - Best model
+    - Best model + second best
+    - etc.
 5. Determine the ensemble that produces the best results and select this ensemble for cross-database testing
-
----
-
-## Installing dependencies
-
-### Environment
-
-```sh
-conda env create -f environment.yaml
-```
-
-### BSIF
-
-```sh
-conda activate osipad
-cd python/BSIF_C
-python setup.py install
-```
