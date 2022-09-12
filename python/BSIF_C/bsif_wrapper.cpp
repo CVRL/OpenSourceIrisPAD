@@ -7,7 +7,7 @@
 
 #include <Python.h> //include python api
 //#include "/usr/local/Cellar/numpy/1.15.4/lib/python2.7/site-packages/numpy/core/include/numpy/arrayobject.h"
-#include "/usr/include/numpy/arrayobject.h"
+#include "/home/lucas/.local/lib/python3.9/site-packages/numpy/core/include/numpy/arrayobject.h"
 
 static PyObject *
 loadFilter(PyObject *self, PyObject *args)
